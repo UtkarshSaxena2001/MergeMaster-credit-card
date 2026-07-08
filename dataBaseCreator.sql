@@ -50,10 +50,8 @@ CREATE TABLE transactions (
     failure_reason VARCHAR2(255),
 
     CONSTRAINT pk_transactions PRIMARY KEY (transaction_id),
-    CONSTRAINT fk_transaction_card FOREIGN KEY (card_number)
-        REFERENCES credit_card(card_number),
-    CONSTRAINT fk_transaction_merchant FOREIGN KEY (merchant_id)
-        REFERENCES merchant(merchant_id),
+    CONSTRAINT fk_transaction_card FOREIGN KEY (card_number) REFERENCES credit_card(card_number),
+    CONSTRAINT fk_transaction_merchant FOREIGN KEY (merchant_id) REFERENCES merchant(merchant_id),
     CONSTRAINT chk_transaction_type CHECK (transaction_type IN ('PURCHASE', 'PAYMENT')),
     CONSTRAINT chk_transaction_status CHECK (status IN ('SUCCESS', 'FAILED')),
     CONSTRAINT chk_transaction_amount CHECK (amount > 0),
