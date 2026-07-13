@@ -1,5 +1,7 @@
-package merchant;
+package merchant; 
 
-public class MerchantRepository {
-    
+//Handle merchant DB access.(CRUD)
+
+public interface MerchantRepository { 
+    //JPA repository part 
 }
