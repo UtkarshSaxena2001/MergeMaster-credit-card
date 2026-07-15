@@ -1,11 +1,29 @@
 package merchant;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 //Represent merchant table data
 
+@Entity
+@Table(name = "merchant")
 public class Merchant {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "merchant_id")
     private long merchantID;
+
+    @Column(name = "merchant_name", nullable = false, length = 100)
     private String merchantName;
+
+    @Column(nullable = false, length = 50)
     private String category;
+
+    @Column(length = 100)
     private String location;
 
     protected Merchant() {
