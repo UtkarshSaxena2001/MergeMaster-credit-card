@@ -1,15 +1,14 @@
 package merchant;
 
-//Return merchant output safely.
-
 public class MerchantResponse {
+
     private Long merchantId;
     private String merchantName;
     private String category;
     private String location;
 
     public Long getMerchantId() {
-        return this.merchantId;
+        return merchantId;
     }
 
     public void setMerchantId(Long merchantId) {
@@ -17,7 +16,7 @@ public class MerchantResponse {
     }
 
     public String getMerchantName() {
-        return this.merchantName;
+        return merchantName;
     }
 
     public void setMerchantName(String merchantName) {
@@ -25,7 +24,7 @@ public class MerchantResponse {
     }
 
     public String getCategory() {
-        return this.category;
+        return category;
     }
 
     public void setCategory(String category) {
@@ -33,7 +32,7 @@ public class MerchantResponse {
     }
 
     public String getLocation() {
-        return this.location;
+        return location;
     }
 
     public void setLocation(String location) {

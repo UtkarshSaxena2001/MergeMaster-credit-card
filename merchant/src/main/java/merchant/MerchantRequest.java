@@ -1,14 +1,23 @@
 package merchant;
 
-//Accept merchant input from client.
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public class MerchantRequest {
+
+    @NotBlank(message = "Merchant name is required")
+    @Size(max = 100, message = "Merchant name must not exceed 100 characters")
     private String merchantName;
+
+    @NotBlank(message = "Category is required")
+    @Size(max = 50, message = "Category must not exceed 50 characters")
     private String category;
+
+    @Size(max = 100, message = "Location must not exceed 100 characters")
     private String location;
 
     public String getMerchantName() {
-        return this.merchantName;
+        return merchantName;
     }
 
     public void setMerchantName(String merchantName) {
@@ -16,7 +25,7 @@ public class MerchantRequest {
     }
 
     public String getCategory() {
-        return this.category;
+        return category;
     }
 
     public void setCategory(String category) {
@@ -24,11 +33,10 @@ public class MerchantRequest {
     }
 
     public String getLocation() {
-        return this.location;
+        return location;
     }
 
     public void setLocation(String location) {
         this.location = location;
     }
-
 }

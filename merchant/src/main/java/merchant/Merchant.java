@@ -7,15 +7,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-//Represent merchant table data
-
 @Entity
 @Table(name = "merchant")
 public class Merchant {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "merchant_id")
-    private long merchantID;
+    private Long merchantId;
 
     @Column(name = "merchant_name", nullable = false, length = 100)
     private String merchantName;
@@ -27,29 +26,25 @@ public class Merchant {
     private String location;
 
     protected Merchant() {
-        this.merchantID = 123456;
-        this.merchantName = "Visa";
-        this.category = "A";
-        this.location = "Bangalore";
     }
 
-    public Merchant(long merId,String merName,String cata,String loca) {
-        this.merchantID = merId;
-        this.merchantName = merName;
-        this.category = cata;
-        this.location = loca;
+    public Merchant(Long merchantId, String merchantName, String category, String location) {
+        this.merchantId = merchantId;
+        this.merchantName = merchantName;
+        this.category = category;
+        this.location = location;
     }
 
-    public long getMerchantID() {
-        return this.merchantID;
+    public Long getMerchantId() {
+        return merchantId;
     }
 
-    public void setMerchantID(long merchantID) {
-        this.merchantID = merchantID;
+    public void setMerchantId(Long merchantId) {
+        this.merchantId = merchantId;
     }
 
     public String getMerchantName() {
-        return this.merchantName;
+        return merchantName;
     }
 
     public void setMerchantName(String merchantName) {
@@ -57,7 +52,7 @@ public class Merchant {
     }
 
     public String getCategory() {
-        return this.category;
+        return category;
     }
 
     public void setCategory(String category) {
@@ -65,22 +60,10 @@ public class Merchant {
     }
 
     public String getLocation() {
-        return this.location;
+        return location;
     }
 
     public void setLocation(String location) {
         this.location = location;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Merchant{");
-        sb.append("merchantID=").append(merchantID);
-        sb.append(", merchantName=").append(merchantName);
-        sb.append(", category=").append(category);
-        sb.append(", location=").append(location);
-        sb.append('}');
-        return sb.toString();
     }
 }
