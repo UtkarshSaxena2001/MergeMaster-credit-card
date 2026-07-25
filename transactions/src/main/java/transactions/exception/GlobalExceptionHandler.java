@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice
+@RestControllerAdvice(name = "transactionsExceptionHandler")
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(TransactionNotFoundException.class)
