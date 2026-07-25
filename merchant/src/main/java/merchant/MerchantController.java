@@ -32,20 +32,20 @@ public class MerchantController {
         return ResponseEntity.status(HttpStatus.CREATED).body(merchantService.addMerchant(request));
     }
 
-    @PutMapping("/{merchantId}")
+    @PutMapping("merchant/{merchantId}")
     public ResponseEntity<MerchantResponse> updateMerchant(
             @PathVariable Long merchantId,
             @Valid @RequestBody MerchantRequest request) {
         return ResponseEntity.ok(merchantService.updateMerchant(merchantId, request));
     }
 
-    @DeleteMapping("/{merchantId}")
+    @DeleteMapping("merchant/{merchantId}")
     public ResponseEntity<Void> deleteMerchant(@PathVariable Long merchantId) {
         merchantService.deleteMerchant(merchantId);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{merchantId}")
+    @GetMapping("merchant/{merchantId}")
     public ResponseEntity<MerchantResponse> getMerchantById(@PathVariable Long merchantId) {
         return ResponseEntity.ok(merchantService.getMerchantById(merchantId));
     }
