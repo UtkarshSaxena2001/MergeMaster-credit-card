@@ -1,0 +1,19 @@
+# Maven build output
+target/
+
+# Eclipse / STS
+.settings/
+.classpath
+.project
+
+# Java compiled files
+*.class
+
+# Logs
+*.log
+
+# Local environment files
+.env
+application-local.properties
+application-local.yml
+application-local.yaml
