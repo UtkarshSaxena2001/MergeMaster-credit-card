@@ -6,6 +6,7 @@ import java.util.List;
 import transactions.dto.PaymentRequest;
 import transactions.dto.PurchaseRequest;
 import transactions.dto.TransactionResponse;
+import transactions.dto.ReportResponse;
 
 public interface TransactionService {
 
@@ -32,4 +33,11 @@ public interface TransactionService {
             LocalDateTime from,
             LocalDateTime to
     );
+    ReportResponse getTodayPurchaseTotal();
+
+    ReportResponse getTodayPaymentTotal();
+    ReportResponse getMerchantWithHighestSales();
+    ReportResponse getMostUsedCard();
+    ReportResponse getTotalOutstandingAcrossAllCustomers();
+    ReportResponse getLargestPurchaseTransaction();
 }
