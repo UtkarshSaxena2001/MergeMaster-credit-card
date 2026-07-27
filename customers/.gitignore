@@ -1,0 +1,16 @@
+target/
+*.class
+*.jar
+*.log
+
+.settings/
+.project
+.classpath
+.springBeans
+.sts4-cache/
+
+.vscode/
+.idea/
+
+.env
+application-local.properties
