@@ -1,4 +1,4 @@
-package customers;
+ package customers;
 
 public class Customer {
 
