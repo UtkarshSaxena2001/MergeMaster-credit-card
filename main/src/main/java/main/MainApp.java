@@ -7,11 +7,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
  * Single entry point for the MergeMaster credit-card APIs.
- * Customer support can be added here as another module later.
+ * All current MergeMaster API modules are loaded here.
  */
-@SpringBootApplication(scanBasePackages = { "com.ofss", "merchant", "transactions" })
-@EntityScan(basePackages = { "merchant", "transactions.entity" })
-@EnableJpaRepositories(basePackages = { "merchant", "transactions.repository" })
+@SpringBootApplication(scanBasePackages = { "com.ofss", "customer", "merchant", "transactions" })
+@EntityScan(basePackages = { "customer", "merchant", "transactions.entity" })
+@EnableJpaRepositories(basePackages = { "customer", "merchant", "transactions.repository" })
 public class MainApp {
 
     public static void main(String[] args) {

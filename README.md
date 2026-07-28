@@ -1,6 +1,6 @@
 # MergeMaster Credit Card
 
-This is a Maven multi-module Spring Boot project. The `main` module starts the integrated Credit Card, Merchant, and Transactions APIs. The `customers` folder is intentionally not included yet.
+This is a Maven multi-module Spring Boot project. The `main` module starts the integrated Credit Card, Customer, Merchant, and Transactions APIs.
 
 ## Run in STS or VS Code
 
