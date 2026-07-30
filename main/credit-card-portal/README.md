@@ -11,7 +11,14 @@ Transactions pages. The client uses the Spring Boot APIs rather than mock data.
    ```powershell
    $env:JAVA_HOME = 'C:\Program Files\Eclipse Adoptium\jdk-17.0.19.10-hotspot'
    $env:Path = "$env:JAVA_HOME\bin;$env:Path"
-   & 'C:\Users\Utkarsh\.m2\wrapper\dists\apache-maven-3.9.16\0daed3be3ebd1c706f0e69e8b07c6b73f5cc4ea3dfce72a8d0ec2e849ca2ddb0\bin\mvn.cmd' -f .\pom.xml spring-boot:run -pl main -am
+   $mvn = 'C:\Users\Utkarsh\.m2\wrapper\dists\apache-maven-3.9.16\0daed3be3bd1c706f0e69e8b07c6b73f5cc4ea3dfce72a8d0ec2e849ca2ddb0\bin\mvn.cmd'
+
+   # One-time build, and whenever a backend module changes:
+   & $mvn -f .\pom.xml -pl main -am clean install -DskipTests
+   if ($LASTEXITCODE -ne 0) { throw 'Backend build failed' }
+
+   # Start only the integrated Spring Boot module:
+   & $mvn -f .\main\pom.xml spring-boot:run
    ```
 
 2. In this folder, install dependencies and start the JET dev server:

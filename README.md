@@ -6,7 +6,20 @@ This is a Maven multi-module Spring Boot project. The `main` module starts the i
 
 1. Import/open the repository root as an **Existing Maven Project** (STS) or as a folder with the Java Extension Pack (VS Code).
 2. Use Java 17.
-3. Run `main.MainApp`, or run `mvn spring-boot:run -pl main -am` from the repository root.
+3. Run `main.MainApp`.
+
+From a terminal, build the reactor first and then start only the integrated
+`main` module:
+
+```powershell
+mvn -f .\pom.xml -pl main -am clean install -DskipTests
+if ($LASTEXITCODE -ne 0) { throw 'Backend build failed' }
+mvn -f .\main\pom.xml spring-boot:run
+```
+
+Do not combine `spring-boot:run` with `-am`: Maven would apply the Spring Boot
+goal to the root aggregator first, and that POM intentionally has no main
+class.
 
 The integrated application starts on `http://localhost:8080` using an in-memory H2 database. H2 Console is available at `/h2-console`.
 
