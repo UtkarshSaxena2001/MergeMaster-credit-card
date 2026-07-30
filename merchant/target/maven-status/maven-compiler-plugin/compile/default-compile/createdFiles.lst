@@ -1,0 +1,10 @@
+merchant\MerchantNotFoundException.class
+merchant\GlobalExceptionHandler.class
+merchant\Merchant.class
+merchant\MerchantController.class
+merchant\MerchantRepository.class
+merchant\MerchantResponse.class
+merchant\MerchantApplication.class
+merchant\MerchantService.class
+merchant\MerchantRequest.class
+merchant\MerchantServiceImpl.class

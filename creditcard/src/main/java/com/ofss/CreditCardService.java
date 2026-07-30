@@ -207,6 +207,60 @@ public class CreditCardService {
         }
     }
 
+    public CreditCard recordPurchase(String cardNumber, BigDecimal amount) {
+        CreditCard card = fetchCreditCardByNumber(cardNumber);
+
+        if (card == null) {
+            return null;
+        }
+
+        if (!"ACTIVE".equalsIgnoreCase(card.getCardStatus())) {
+            throw new IllegalArgumentException("Credit card is not active");
+        }
+
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Purchase amount must be greater than zero");
+        }
+
+        if (card.getAvailableCredit().compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Insufficient available credit");
+        }
+
+        card.setAvailableCredit(card.getAvailableCredit().subtract(amount));
+        card.setOutstandingAmount(card.getOutstandingAmount().add(amount));
+
+        return card;
+    }
+
+    public CreditCard recordPayment(String cardNumber, BigDecimal amount) {
+        CreditCard card = fetchCreditCardByNumber(cardNumber);
+
+        if (card == null) {
+            return null;
+        }
+
+        if (!"ACTIVE".equalsIgnoreCase(card.getCardStatus())) {
+            throw new IllegalArgumentException("Credit card is not active");
+        }
+
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Payment amount must be greater than zero");
+        }
+
+        if (amount.compareTo(card.getOutstandingAmount()) > 0) {
+            throw new IllegalArgumentException("Payment amount cannot exceed outstanding amount");
+        }
+
+        card.setOutstandingAmount(card.getOutstandingAmount().subtract(amount));
+        card.setAvailableCredit(card.getAvailableCredit().add(amount));
+
+        if (card.getAvailableCredit().compareTo(card.getCreditLimit()) > 0) {
+            card.setAvailableCredit(card.getCreditLimit());
+        }
+
+        return card;
+    }
+
     private boolean isValidCreditCard(CreditCard card) {
 
         if (card.getCardNumber() == null ||
