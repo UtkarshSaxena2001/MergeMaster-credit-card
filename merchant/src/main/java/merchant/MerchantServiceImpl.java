@@ -2,9 +2,12 @@ package merchant;
 
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class MerchantServiceImpl implements MerchantService {
 
     private final MerchantRepository merchantRepository;
@@ -31,7 +34,14 @@ public class MerchantServiceImpl implements MerchantService {
     @Override
     public void deleteMerchant(Long merchantId) {
         Merchant merchant = validateMerchantExists(merchantId);
-        merchantRepository.delete(merchant);
+        try {
+            merchantRepository.delete(merchant);
+            merchantRepository.flush();
+        } catch (DataIntegrityViolationException exception) {
+            throw new IllegalStateException(
+                    "Merchant cannot be deleted because transaction history is linked to it",
+                    exception);
+        }
     }
 
     @Override

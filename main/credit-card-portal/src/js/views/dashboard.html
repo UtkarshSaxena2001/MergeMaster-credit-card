@@ -121,7 +121,10 @@
     <div class="overview-strip">
       <span><strong data-bind="text: customerCount"></strong> customers</span>
       <span><strong data-bind="text: merchantCount"></strong> merchant partners</span>
-      <span class="connection-pill"><i></i> API connected</span>
+      <span class="connection-pill"
+            data-bind="css: { 'connection-pill-down': databaseStatus().status !== 'UP' }">
+        <i></i><span data-bind="text: databaseLabel"></span>
+      </span>
     </div>
   </div>
 </section>

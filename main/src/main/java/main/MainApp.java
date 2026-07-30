@@ -20,7 +20,7 @@ import transactions.TransactionsApplication;
  */
 @SpringBootApplication
 @ComponentScan(
-        basePackages = { "com.ofss", "customer", "merchant", "transactions" },
+        basePackages = { "main", "com.ofss", "customer", "merchant", "transactions" },
         excludeFilters = @ComponentScan.Filter(
                 type = FilterType.ASSIGNABLE_TYPE,
                 classes = {
@@ -30,8 +30,9 @@ import transactions.TransactionsApplication;
                         TransactionsApplication.class
                 }))
 @Import(ApiCorsConfiguration.class)
-@EntityScan(basePackages = { "customer", "merchant", "transactions.entity" })
-@EnableJpaRepositories(basePackages = { "customer", "merchant", "transactions.repository" })
+@EntityScan(basePackages = { "com.ofss", "customer", "merchant", "transactions.entity" })
+@EnableJpaRepositories(
+        basePackages = { "com.ofss", "customer", "merchant", "transactions.repository" })
 public class MainApp {
 
     public static void main(String[] args) {

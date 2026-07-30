@@ -216,6 +216,8 @@ button:disabled { cursor: not-allowed; opacity: 0.52; }
 .overview-strip strong { color: var(--ink-strong); }
 .connection-pill { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; color: var(--green); font-weight: 700; }
 .connection-pill i { width: 8px; height: 8px; border-radius: 50%; background: #36bb8b; }
+.connection-pill-down { color: #9f1c1c; background: #fff0f0; }
+.connection-pill-down i { background: #c43d3d; }
 
 .form-card { margin-bottom: 20px; }
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 17px; }

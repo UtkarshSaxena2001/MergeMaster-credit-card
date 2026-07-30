@@ -3,15 +3,38 @@ package com.ofss;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "CREDIT_CARD")
 public class CreditCard {
 
+    @Id
+    @Column(name = "CARD_NUMBER", nullable = false, length = 16)
     private String cardNumber;
-    private int customerId;
+
+    @Column(name = "CUSTOMER_ID", nullable = false, precision = 7)
+    private Long customerId;
+
+    @Column(name = "CARD_TYPE", nullable = false, length = 20)
     private String cardType;
+
+    @Column(name = "CREDIT_LIMIT", nullable = false, precision = 12, scale = 2)
     private BigDecimal creditLimit;
+
+    @Column(name = "AVAILABLE_CREDIT", nullable = false, precision = 12, scale = 2)
     private BigDecimal availableCredit;
+
+    @Column(name = "OUTSTANDING_AMOUNT", nullable = false, precision = 12, scale = 2)
     private BigDecimal outstandingAmount;
+
+    @Column(name = "EXPIRY_DATE", nullable = false)
     private LocalDate expiryDate;
+
+    @Column(name = "CARD_STATUS", nullable = false, length = 20)
     private String cardStatus;
 
     public CreditCard() {
@@ -19,7 +42,7 @@ public class CreditCard {
 
     public CreditCard(
             String cardNumber,
-            int customerId,
+            Long customerId,
             String cardType,
             BigDecimal creditLimit,
             BigDecimal availableCredit,
@@ -45,11 +68,11 @@ public class CreditCard {
         this.cardNumber = cardNumber;
     }
 
-    public int getCustomerId() {
+    public Long getCustomerId() {
         return customerId;
     }
 
-    public void setCustomerId(int customerId) {
+    public void setCustomerId(Long customerId) {
         this.customerId = customerId;
     }
 

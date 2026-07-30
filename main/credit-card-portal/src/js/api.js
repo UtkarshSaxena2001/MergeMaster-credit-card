@@ -56,6 +56,8 @@ define([], function () {
   }
 
   const api = {
+    getDatabaseStatus: () => request("/api/system/database"),
+
     getCustomers: () => request("/api/customers"),
     createCustomer: (input) => request("/api/customers", { method: "POST", ...jsonBody(input) }),
     updateCustomer: (id, input) => request(`/api/customers/${id}`, { method: "PUT", ...jsonBody(input) }),

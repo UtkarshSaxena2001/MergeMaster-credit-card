@@ -79,8 +79,14 @@ public class CreditCardController {
     public ResponseEntity<String> deleteCreditCard(
             @PathVariable String cardNumber) {
 
-        boolean deleted =
-                creditCardService.deleteCreditCard(cardNumber);
+        final boolean deleted;
+        try {
+            deleted = creditCardService.deleteCreditCard(cardNumber);
+        } catch (IllegalStateException exception) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(exception.getMessage());
+        }
 
         if (deleted) {
             return ResponseEntity

@@ -3,15 +3,16 @@ package com.ofss;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CreditCardService {
 
-    private final ArrayList<CreditCard> allCreditCards;
     private static final Set<String> PATCHABLE_FIELDS = Set.of(
             "customerId",
             "cardType",
@@ -22,111 +23,83 @@ public class CreditCardService {
             "cardStatus"
     );
 
-    public CreditCardService() {
+    private final CreditCardRepository creditCardRepository;
 
-        allCreditCards = new ArrayList<>();
-
-        CreditCard card1 = new CreditCard(
-                "1111222233334444",
-                1,
-                "GOLD",
-                new BigDecimal("100000.00"),
-                new BigDecimal("85000.00"),
-                new BigDecimal("15000.00"),
-                LocalDate.of(2029, 12, 31),
-                "ACTIVE"
-        );
-
-        CreditCard card2 = new CreditCard(
-                "5555666677778888",
-                2,
-                "PLATINUM",
-                new BigDecimal("200000.00"),
-                new BigDecimal("180000.00"),
-                new BigDecimal("20000.00"),
-                LocalDate.of(2030, 6, 30),
-                "ACTIVE"
-        );
-
-        CreditCard card3 = new CreditCard(
-                "9999000011112222",
-                3,
-                "SILVER",
-                new BigDecimal("50000.00"),
-                new BigDecimal("50000.00"),
-                BigDecimal.ZERO,
-                LocalDate.of(2028, 10, 31),
-                "BLOCKED"
-        );
-
-        allCreditCards.add(card1);
-        allCreditCards.add(card2);
-        allCreditCards.add(card3);
-
-        System.out.println(
-                "CreditCardService initialized with "
-                        + allCreditCards.size()
-                        + " cards."
-        );
+    public CreditCardService(CreditCardRepository creditCardRepository) {
+        this.creditCardRepository = creditCardRepository;
     }
 
-    // GET all cards
-    public synchronized ArrayList<CreditCard> fetchAllCreditCards() {
-        return new ArrayList<>(allCreditCards);
+    @Transactional(readOnly = true)
+    public ArrayList<CreditCard> fetchAllCreditCards() {
+        return new ArrayList<>(creditCardRepository.findAll());
     }
 
-    // GET card by card number
-    public synchronized CreditCard fetchCreditCardByNumber(String cardNumber) {
-
-        return allCreditCards
-                .stream()
-                .filter(card -> card.getCardNumber().equals(cardNumber))
-                .findFirst()
-                .orElse(null);
-    }
-
-    // POST
-    public synchronized boolean addNewCreditCard(CreditCard newCreditCard) {
-
-        if (newCreditCard == null ||
-                newCreditCard.getCardNumber() == null ||
-                newCreditCard.getCardNumber().isBlank()) {
-            return false;
+    @Transactional(readOnly = true)
+    public CreditCard fetchCreditCardByNumber(String cardNumber) {
+        if (cardNumber == null || cardNumber.isBlank()) {
+            return null;
         }
 
-        CreditCard existingCard =
-                fetchCreditCardByNumber(newCreditCard.getCardNumber());
+        return creditCardRepository.findById(cardNumber).orElse(null);
+    }
 
-        if (existingCard != null) {
+    @Transactional
+    public boolean addNewCreditCard(CreditCard newCreditCard) {
+        if (newCreditCard == null
+                || newCreditCard.getCardNumber() == null
+                || newCreditCard.getCardNumber().isBlank()) {
             return false;
         }
 
         CreditCard cardToAdd = copyOf(newCreditCard);
-        if (!isValidCreditCard(cardToAdd)) {
+        if (!isValidCreditCard(cardToAdd)
+                || creditCardRepository.existsById(cardToAdd.getCardNumber())) {
             return false;
         }
 
-        allCreditCards.add(cardToAdd);
-        return true;
+        try {
+            creditCardRepository.saveAndFlush(cardToAdd);
+            return true;
+        } catch (DataIntegrityViolationException exception) {
+            return false;
+        }
     }
 
-    // DELETE
-    public synchronized boolean deleteCreditCard(String cardNumber) {
+    @Transactional
+    public boolean deleteCreditCard(String cardNumber) {
+        if (cardNumber == null || cardNumber.isBlank()) {
+            return false;
+        }
 
-        return allCreditCards.removeIf(
-                card -> card.getCardNumber().equals(cardNumber)
-        );
+        CreditCard card = creditCardRepository
+                .findByCardNumberForUpdate(cardNumber)
+                .orElse(null);
+
+        if (card == null) {
+            return false;
+        }
+
+        try {
+            creditCardRepository.delete(card);
+            creditCardRepository.flush();
+            return true;
+        } catch (DataIntegrityViolationException exception) {
+            throw new IllegalStateException(
+                    "Credit card cannot be deleted because transaction history is linked to it",
+                    exception);
+        }
     }
 
-    // PUT: replace complete card information
-    public synchronized CreditCard replaceCreditCard(
+    @Transactional
+    public CreditCard replaceCreditCard(
             String cardNumber,
             CreditCard replacementCard) {
 
-        CreditCard existingCard =
-                fetchCreditCardByNumber(cardNumber);
+        if (cardNumber == null || cardNumber.isBlank() || replacementCard == null) {
+            return null;
+        }
 
-        if (existingCard == null || replacementCard == null) {
+        if (creditCardRepository.findByCardNumberForUpdate(cardNumber).isEmpty()) {
             return null;
         }
 
@@ -137,107 +110,95 @@ public class CreditCardService {
             return null;
         }
 
-        int index = allCreditCards.indexOf(existingCard);
-        allCreditCards.set(index, replacement);
-
-        return replacement;
+        try {
+            return creditCardRepository.saveAndFlush(replacement);
+        } catch (DataIntegrityViolationException exception) {
+            return null;
+        }
     }
 
-    // PATCH: update selected fields
-    public synchronized CreditCard updateCreditCardPartially(
+    @Transactional
+    public CreditCard updateCreditCardPartially(
             String cardNumber,
             Map<String, Object> updates) {
 
-        CreditCard existingCard =
-                fetchCreditCardByNumber(cardNumber);
+        if (cardNumber == null
+                || cardNumber.isBlank()
+                || updates == null
+                || updates.keySet().stream()
+                        .anyMatch(field -> !PATCHABLE_FIELDS.contains(field))) {
+            return null;
+        }
 
-        if (existingCard == null || updates == null ||
-                updates.keySet().stream().anyMatch(field -> !PATCHABLE_FIELDS.contains(field))) {
+        CreditCard existingCard = creditCardRepository
+                .findByCardNumberForUpdate(cardNumber)
+                .orElse(null);
+
+        if (existingCard == null) {
             return null;
         }
 
         try {
-            // Apply every requested change to a copy first. The original card is
-            // replaced only after the entire patch has passed validation.
             CreditCard updatedCard = copyOf(existingCard);
+
             if (updates.containsKey("customerId")) {
                 updatedCard.setCustomerId(
-                        Integer.parseInt(
-                                updates.get("customerId").toString()
-                        )
-                );
+                        Long.parseLong(updates.get("customerId").toString()));
             }
 
             if (updates.containsKey("cardType")) {
-                updatedCard.setCardType(
-                        updates.get("cardType").toString().toUpperCase()
-                );
+                updatedCard.setCardType(updates.get("cardType").toString());
             }
 
             if (updates.containsKey("creditLimit")) {
                 updatedCard.setCreditLimit(
-                        new BigDecimal(
-                                updates.get("creditLimit").toString()
-                        )
-                );
+                        new BigDecimal(updates.get("creditLimit").toString()));
             }
 
             if (updates.containsKey("availableCredit")) {
                 updatedCard.setAvailableCredit(
-                        new BigDecimal(
-                                updates.get("availableCredit").toString()
-                        )
-                );
+                        new BigDecimal(updates.get("availableCredit").toString()));
             }
 
             if (updates.containsKey("outstandingAmount")) {
                 updatedCard.setOutstandingAmount(
-                        new BigDecimal(
-                                updates.get("outstandingAmount").toString()
-                        )
-                );
+                        new BigDecimal(updates.get("outstandingAmount").toString()));
             }
 
             if (updates.containsKey("expiryDate")) {
                 updatedCard.setExpiryDate(
-                        LocalDate.parse(
-                                updates.get("expiryDate").toString()
-                        )
-                );
+                        LocalDate.parse(updates.get("expiryDate").toString()));
             }
 
             if (updates.containsKey("cardStatus")) {
-                updatedCard.setCardStatus(
-                        updates.get("cardStatus").toString().toUpperCase()
-                );
+                updatedCard.setCardStatus(updates.get("cardStatus").toString());
             }
 
             if (!isValidCreditCard(updatedCard)) {
                 return null;
             }
 
-            int index = allCreditCards.indexOf(existingCard);
-            allCreditCards.set(index, updatedCard);
-            return updatedCard;
-
-        } catch (Exception exception) {
+            return creditCardRepository.saveAndFlush(updatedCard);
+        } catch (RuntimeException exception) {
             return null;
         }
     }
 
-    public synchronized CreditCard recordPurchase(String cardNumber, BigDecimal amount) {
-        CreditCard card = fetchCreditCardByNumber(cardNumber);
+    @Transactional
+    public CreditCard recordPurchase(String cardNumber, BigDecimal amount) {
+        CreditCard card = creditCardRepository
+                .findByCardNumberForUpdate(cardNumber)
+                .orElse(null);
 
         if (card == null) {
             return null;
         }
 
-        if (!"ACTIVE".equalsIgnoreCase(card.getCardStatus())) {
-            throw new IllegalArgumentException("Credit card is not active");
-        }
+        validateUsableCard(card);
 
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Purchase amount must be greater than zero");
+            throw new IllegalArgumentException(
+                    "Purchase amount must be greater than zero");
         }
 
         if (card.getAvailableCredit().compareTo(amount) < 0) {
@@ -246,27 +207,29 @@ public class CreditCardService {
 
         card.setAvailableCredit(card.getAvailableCredit().subtract(amount));
         card.setOutstandingAmount(card.getOutstandingAmount().add(amount));
-
-        return card;
+        return creditCardRepository.saveAndFlush(card);
     }
 
-    public synchronized CreditCard recordPayment(String cardNumber, BigDecimal amount) {
-        CreditCard card = fetchCreditCardByNumber(cardNumber);
+    @Transactional
+    public CreditCard recordPayment(String cardNumber, BigDecimal amount) {
+        CreditCard card = creditCardRepository
+                .findByCardNumberForUpdate(cardNumber)
+                .orElse(null);
 
         if (card == null) {
             return null;
         }
 
-        if (!"ACTIVE".equalsIgnoreCase(card.getCardStatus())) {
-            throw new IllegalArgumentException("Credit card is not active");
-        }
+        validateUsableCard(card);
 
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Payment amount must be greater than zero");
+            throw new IllegalArgumentException(
+                    "Payment amount must be greater than zero");
         }
 
         if (amount.compareTo(card.getOutstandingAmount()) > 0) {
-            throw new IllegalArgumentException("Payment amount cannot exceed outstanding amount");
+            throw new IllegalArgumentException(
+                    "Payment amount cannot exceed outstanding amount");
         }
 
         card.setOutstandingAmount(card.getOutstandingAmount().subtract(amount));
@@ -276,48 +239,53 @@ public class CreditCardService {
             card.setAvailableCredit(card.getCreditLimit());
         }
 
-        return card;
+        return creditCardRepository.saveAndFlush(card);
+    }
+
+    private void validateUsableCard(CreditCard card) {
+        if (!"ACTIVE".equalsIgnoreCase(card.getCardStatus())) {
+            throw new IllegalArgumentException("Credit card is not active");
+        }
+
+        if (card.getExpiryDate() == null
+                || !card.getExpiryDate().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Credit card is expired");
+        }
     }
 
     private boolean isValidCreditCard(CreditCard card) {
-
-        if (card.getCardNumber() == null ||
-                card.getCardNumber().length() != 16) {
+        if (card.getCardNumber() == null
+                || !card.getCardNumber().matches("\\d{16}")) {
             return false;
         }
 
-        if (!card.getCardNumber().matches("\\d{16}")) {
+        if (card.getCustomerId() == null || card.getCustomerId() <= 0) {
             return false;
         }
 
-        if (card.getCustomerId() <= 0) {
+        if (card.getCardType() == null
+                || !(card.getCardType().equalsIgnoreCase("SILVER")
+                || card.getCardType().equalsIgnoreCase("GOLD")
+                || card.getCardType().equalsIgnoreCase("PLATINUM"))) {
             return false;
         }
 
-        if (card.getCardType() == null ||
-                !(card.getCardType().equalsIgnoreCase("SILVER") ||
-                  card.getCardType().equalsIgnoreCase("GOLD") ||
-                  card.getCardType().equalsIgnoreCase("PLATINUM"))) {
+        if (card.getCreditLimit() == null
+                || card.getCreditLimit().compareTo(BigDecimal.ZERO) <= 0) {
             return false;
         }
 
-        if (card.getCreditLimit() == null ||
-                card.getCreditLimit().compareTo(BigDecimal.ZERO) <= 0) {
+        if (card.getAvailableCredit() == null
+                || card.getAvailableCredit().compareTo(BigDecimal.ZERO) < 0) {
             return false;
         }
 
-        if (card.getAvailableCredit() == null ||
-                card.getAvailableCredit().compareTo(BigDecimal.ZERO) < 0) {
+        if (card.getOutstandingAmount() == null
+                || card.getOutstandingAmount().compareTo(BigDecimal.ZERO) < 0) {
             return false;
         }
 
-        if (card.getOutstandingAmount() == null ||
-                card.getOutstandingAmount().compareTo(BigDecimal.ZERO) < 0) {
-            return false;
-        }
-
-        if (card.getAvailableCredit()
-                .compareTo(card.getCreditLimit()) > 0) {
+        if (card.getAvailableCredit().compareTo(card.getCreditLimit()) > 0) {
             return false;
         }
 
@@ -327,19 +295,19 @@ public class CreditCardService {
             return false;
         }
 
-        if (card.getExpiryDate() == null || !card.getExpiryDate().isAfter(LocalDate.now())) {
+        if (card.getExpiryDate() == null
+                || !card.getExpiryDate().isAfter(LocalDate.now())) {
             return false;
         }
 
-        if (card.getCardStatus() == null ||
-                !(card.getCardStatus().equalsIgnoreCase("ACTIVE") ||
-                  card.getCardStatus().equalsIgnoreCase("BLOCKED"))) {
+        if (card.getCardStatus() == null
+                || !(card.getCardStatus().equalsIgnoreCase("ACTIVE")
+                || card.getCardStatus().equalsIgnoreCase("BLOCKED"))) {
             return false;
         }
 
         card.setCardType(card.getCardType().toUpperCase());
         card.setCardStatus(card.getCardStatus().toUpperCase());
-
         return true;
     }
 

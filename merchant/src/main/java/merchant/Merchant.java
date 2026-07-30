@@ -13,7 +13,7 @@ public class Merchant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "merchant_id")
+    @Column(name = "merchant_id", precision = 7)
     private Long merchantId;
 
     @Column(name = "merchant_name", nullable = false, length = 100)

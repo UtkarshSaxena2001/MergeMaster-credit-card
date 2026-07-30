@@ -21,27 +21,27 @@ public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "transaction_id")
+    @Column(name = "transaction_id", precision = 10)
     private Long transactionId;
 
     @Column(name = "card_number", nullable = false, length = 16)
     private String cardNumber;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "transaction_type", nullable = false)
+    @Column(name = "transaction_type", nullable = false, length = 20)
     private TransactionType transactionType;
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal amount;
 
-    @Column(name = "merchant_id")
+    @Column(name = "merchant_id", precision = 7)
     private Long merchantId;
 
     @Column(name = "transaction_date_time", nullable = false)
     private LocalDateTime transactionDateTime;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private TransactionStatus status;
 
     @Column(name = "failure_reason", length = 255)

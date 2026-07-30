@@ -1,2 +1,3 @@
-main\MainApp.class
 main\ApiCorsConfiguration.class
+main\MainApp.class
+main\DatabaseStatusController.class

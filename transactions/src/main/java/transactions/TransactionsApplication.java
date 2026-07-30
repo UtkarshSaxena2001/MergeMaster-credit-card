@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication(scanBasePackages = { "transactions", "com.ofss", "merchant" })
-@EntityScan(basePackages = { "transactions.entity", "merchant" })
-@EnableJpaRepositories(basePackages = { "transactions.repository", "merchant" })
+@EntityScan(basePackages = { "transactions.entity", "com.ofss", "merchant" })
+@EnableJpaRepositories(basePackages = { "transactions.repository", "com.ofss", "merchant" })
 public class TransactionsApplication {
 
 	public static void main(String[] args) {

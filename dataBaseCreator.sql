@@ -27,7 +27,10 @@ CREATE TABLE credit_card (
     CONSTRAINT chk_card_status CHECK (card_status IN ('ACTIVE', 'BLOCKED')),
     CONSTRAINT chk_credit_limit CHECK (credit_limit > 0),
     CONSTRAINT chk_available_credit CHECK (available_credit >= 0),
-    CONSTRAINT chk_outstanding_amount CHECK (outstanding_amount >= 0)
+    CONSTRAINT chk_outstanding_amount CHECK (outstanding_amount >= 0),
+    CONSTRAINT chk_credit_balance CHECK (
+        available_credit + outstanding_amount = credit_limit
+    )
 );
 
 CREATE TABLE merchant (

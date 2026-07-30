@@ -9,6 +9,11 @@ define(["knockout", "../accUtils", "../api"], function (ko, AccUtils, apiModule)
       this.cards = ko.observableArray([]);
       this.merchants = ko.observableArray([]);
       this.transactions = ko.observableArray([]);
+      this.databaseStatus = ko.observable({
+        status: "UNKNOWN",
+        database: "Database",
+        service: ""
+      });
       this.isLoading = ko.observable(true);
       this.error = ko.observable("");
       this.customerCount = ko.pureComputed(() => this.customers().length);
@@ -33,6 +38,12 @@ define(["knockout", "../accUtils", "../api"], function (ko, AccUtils, apiModule)
       this.topCard = ko.pureComputed(() => [...this.cards()].sort(
         (left, right) => Number(right.outstandingAmount) - Number(left.outstandingAmount)
       )[0]);
+      this.databaseLabel = ko.pureComputed(() => {
+        const connection = this.databaseStatus();
+        return connection.status === "UP"
+          ? `${connection.database} ${connection.service} connected`
+          : "Database connection unavailable";
+      });
       this.formatCurrency = formatCurrency;
       this.formatDateTime = formatDateTime;
       this.maskCardNumber = maskCardNumber;
@@ -40,13 +51,22 @@ define(["knockout", "../accUtils", "../api"], function (ko, AccUtils, apiModule)
         this.isLoading(true);
         this.error("");
         try {
-          const [customers, cards, merchants, transactions] = await Promise.all([
-            api.getCustomers(), api.getCards(), api.getMerchants(), api.getTransactions()
+          const [customers, cards, merchants, transactions, databaseStatus] = await Promise.all([
+            api.getCustomers(),
+            api.getCards(),
+            api.getMerchants(),
+            api.getTransactions(),
+            api.getDatabaseStatus().catch(() => ({
+              status: "DOWN",
+              database: "Database",
+              service: ""
+            }))
           ]);
           this.customers(customers);
           this.cards(cards);
           this.merchants(merchants);
           this.transactions(transactions);
+          this.databaseStatus(databaseStatus);
         } catch (error) {
           this.error(error instanceof Error ? error.message : "Unable to load dashboard data.");
         } finally {
