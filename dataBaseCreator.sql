@@ -64,3 +64,6 @@ CREATE TABLE transactions (
         (transaction_type = 'PAYMENT' AND merchant_id IS NULL)
     )
 );
+
+
+select * from customer;
