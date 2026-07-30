@@ -1,17 +1,16 @@
 package transactions.service;
 
 import java.math.BigDecimal;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ofss.CreditCardService;
+
+import merchant.MerchantService;
 import transactions.dto.PaymentRequest;
 import transactions.dto.PurchaseRequest;
 import transactions.dto.TransactionResponse;
@@ -29,12 +28,15 @@ import transactions.repository.TransactionRepository;
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
-    private final ApplicationContext applicationContext;
+    private final CreditCardService creditCardService;
+    private final MerchantService merchantService;
 
     public TransactionServiceImpl(TransactionRepository transactionRepository,
-                                  ApplicationContext applicationContext) {
+                                  CreditCardService creditCardService,
+                                  MerchantService merchantService) {
         this.transactionRepository = transactionRepository;
-        this.applicationContext = applicationContext;
+        this.creditCardService = creditCardService;
+        this.merchantService = merchantService;
     }
 
     @Override
@@ -145,10 +147,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private void recordCardPurchase(PurchaseRequest request) {
         try {
-            Object card = invokeModuleMethod(
-                    "creditCardService",
-                    "recordPurchase",
-                    new Class<?>[] { String.class, BigDecimal.class },
+            Object card = creditCardService.recordPurchase(
                     request.getCardNumber(),
                     request.getAmount());
 
@@ -163,10 +162,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private void recordCardPayment(PaymentRequest request) {
         try {
-            Object card = invokeModuleMethod(
-                    "creditCardService",
-                    "recordPayment",
-                    new Class<?>[] { String.class, BigDecimal.class },
+            Object card = creditCardService.recordPayment(
                     request.getCardNumber(),
                     request.getAmount());
 
@@ -181,36 +177,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     private void validateMerchantExists(Long merchantId) {
         try {
-            invokeModuleMethod(
-                    "merchantServiceImpl",
-                    "getMerchantById",
-                    new Class<?>[] { Long.class },
-                    merchantId);
-        } catch (IllegalArgumentException | IllegalStateException exception) {
+            merchantService.getMerchantById(merchantId);
+        } catch (merchant.MerchantNotFoundException exception) {
             throw new MerchantNotFoundException(exception.getMessage());
-        }
-    }
-
-    private Object invokeModuleMethod(String beanName,
-                                      String methodName,
-                                      Class<?>[] parameterTypes,
-                                      Object... args) {
-        try {
-            Object bean = applicationContext.getBean(beanName);
-            Method method = bean.getClass().getMethod(methodName, parameterTypes);
-            return method.invoke(bean, args);
-        } catch (NoSuchBeanDefinitionException exception) {
-            throw new IllegalStateException(
-                    "Module connector is not available: " + beanName);
-        } catch (NoSuchMethodException | IllegalAccessException exception) {
-            throw new IllegalStateException(
-                    "Module connector is not configured correctly: " + beanName);
-        } catch (InvocationTargetException exception) {
-            Throwable cause = exception.getCause();
-            if (cause instanceof RuntimeException runtimeException) {
-                throw runtimeException;
-            }
-            throw new IllegalStateException(cause.getMessage());
         }
     }
 

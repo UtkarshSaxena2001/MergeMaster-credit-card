@@ -1,0 +1,85 @@
+<section class="page-shell">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">Customer module</p>
+      <h1>Customer directory</h1>
+      <p class="page-subtitle">Maintain verified customer records before issuing a card.</p>
+    </div>
+    <button class="button button-primary" type="button" data-bind="click: openCreate">+ Add customer</button>
+  </header>
+
+  <div class="status-panel status-panel-error" data-bind="visible: error">
+    <strong>Couldn’t load customers.</strong><span data-bind="text: error"></span>
+    <button class="link-button" type="button" data-bind="click: refresh">Try again</button>
+  </div>
+
+  <div class="surface-card form-card" data-bind="visible: formVisible">
+    <div class="surface-card-header">
+      <div>
+        <p class="eyebrow" data-bind="text: isEditing() ? 'Update record' : 'New customer'"></p>
+        <h2 data-bind="text: isEditing() ? 'Edit customer' : 'Add a customer'"></h2>
+      </div>
+      <button class="icon-button" type="button" aria-label="Close customer form" data-bind="click: closeForm">×</button>
+    </div>
+    <form class="form-grid" data-bind="submit: submitForm" novalidate>
+      <label class="field field-span-2">
+        <span>Full name</span>
+        <input type="text" maxlength="100" autocomplete="name" placeholder="e.g. Aarav Sharma" data-bind="value: customerName, valueUpdate: 'input'">
+      </label>
+      <label class="field">
+        <span>Email address</span>
+        <input type="email" maxlength="100" autocomplete="email" placeholder="name@example.com" data-bind="value: email, valueUpdate: 'input'">
+      </label>
+      <label class="field">
+        <span>Mobile number</span>
+        <input type="tel" maxlength="15" inputmode="numeric" autocomplete="tel" placeholder="10–15 digits" data-bind="value: mobileNumber, valueUpdate: 'input'">
+      </label>
+      <label class="field field-span-2">
+        <span>PAN number</span>
+        <input type="text" maxlength="10" autocapitalize="characters" placeholder="ABCDE1234F" data-bind="value: panNumber, valueUpdate: 'input'">
+      </label>
+      <div class="form-error field-span-2" data-bind="visible: formError, text: formError"></div>
+      <div class="form-actions field-span-2">
+        <button class="button button-secondary" type="button" data-bind="click: closeForm, disable: formBusy">Cancel</button>
+        <button class="button button-primary" type="submit" data-bind="disable: formBusy">
+          <span data-bind="text: formBusy() ? 'Saving…' : (isEditing() ? 'Save changes' : 'Add customer')"></span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <article class="surface-card data-card">
+    <div class="data-toolbar">
+      <div class="search-field">
+        <span aria-hidden="true">⌕</span>
+        <input type="search" aria-label="Search customers" placeholder="Search name, email, mobile or PAN" data-bind="value: searchText, valueUpdate: 'input'">
+      </div>
+      <button class="button button-quiet" type="button" data-bind="click: refresh, disable: isLoading">Refresh</button>
+    </div>
+
+    <div class="loading-panel" data-bind="visible: isLoading"><span class="loading-spinner"></span> Loading customers…</div>
+    <div class="table-wrap" data-bind="visible: !isLoading() && !error() && filteredCustomers().length">
+      <table class="data-table">
+        <thead>
+          <tr><th>Customer</th><th>Contact</th><th>PAN</th><th>Cards</th><th><span class="sr-only">Actions</span></th></tr>
+        </thead>
+        <tbody data-bind="foreach: filteredCustomers">
+          <tr>
+            <td><strong data-bind="text: customerName"></strong><small data-bind="text: 'ID ' + customerId"></small></td>
+            <td><span data-bind="text: email"></span><small data-bind="text: mobileNumber"></small></td>
+            <td><span class="sensitive-data" data-bind="text: panNumber"></span></td>
+            <td><span class="linked-label" data-bind="text: $parent.linkedCardLabel($data)"></span></td>
+            <td class="row-actions">
+              <button class="text-action" type="button" data-bind="click: $parent.openEdit">Edit</button>
+              <button class="text-action text-action-danger" type="button" data-bind="click: $parent.deleteCustomer, disable: $parent.isLinkedToCard($data)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="empty-state" data-bind="visible: !isLoading() && !error() && filteredCustomers().length === 0">
+      <strong data-bind="text: searchText() ? 'No matching customers' : 'No customers yet'"></strong>
+      <span data-bind="text: searchText() ? 'Try a different search term.' : 'Add a customer before issuing their first card.'"></span>
+    </div>
+  </article>
+</section>

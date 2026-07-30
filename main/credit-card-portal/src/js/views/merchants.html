@@ -1,0 +1,52 @@
+<section class="page-shell">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">Merchant module</p>
+      <h1>Merchant directory</h1>
+      <p class="page-subtitle">Maintain the merchant partners available for card purchases.</p>
+    </div>
+    <button class="button button-primary" type="button" data-bind="click: openCreate">+ Add merchant</button>
+  </header>
+
+  <div class="status-panel status-panel-error" data-bind="visible: error">
+    <strong>Couldn’t load merchants.</strong><span data-bind="text: error"></span>
+    <button class="link-button" type="button" data-bind="click: refresh">Try again</button>
+  </div>
+
+  <div class="surface-card form-card" data-bind="visible: formVisible">
+    <div class="surface-card-header">
+      <div><p class="eyebrow" data-bind="text: isEditing() ? 'Update partner' : 'New partner'"></p><h2 data-bind="text: isEditing() ? 'Edit merchant' : 'Add a merchant'"></h2></div>
+      <button class="icon-button" type="button" aria-label="Close merchant form" data-bind="click: closeForm">×</button>
+    </div>
+    <form class="form-grid" data-bind="submit: submitForm" novalidate>
+      <label class="field"><span>Merchant name</span><input type="text" maxlength="100" placeholder="e.g. Urban Market" data-bind="value: merchantName, valueUpdate: 'input'"></label>
+      <label class="field"><span>Category</span><input type="text" maxlength="50" placeholder="e.g. Grocery" data-bind="value: category, valueUpdate: 'input'"></label>
+      <label class="field field-span-2"><span>Location <em>Optional</em></span><input type="text" maxlength="100" placeholder="e.g. Bengaluru, Karnataka" data-bind="value: location, valueUpdate: 'input'"></label>
+      <div class="form-error field-span-2" data-bind="visible: formError, text: formError"></div>
+      <div class="form-actions field-span-2"><button class="button button-secondary" type="button" data-bind="click: closeForm, disable: formBusy">Cancel</button><button class="button button-primary" type="submit" data-bind="disable: formBusy"><span data-bind="text: formBusy() ? 'Saving…' : (isEditing() ? 'Save changes' : 'Add merchant')"></span></button></div>
+    </form>
+  </div>
+
+  <article class="surface-card data-card">
+    <div class="data-toolbar toolbar-split">
+      <div class="search-field"><span aria-hidden="true">⌕</span><input type="search" aria-label="Search merchants" placeholder="Search merchant, category or location" data-bind="value: searchText, valueUpdate: 'input'"></div>
+      <div class="toolbar-actions"><select class="filter-select" aria-label="Filter merchant category" data-bind="options: categories, value: categoryFilter"></select><button class="button button-quiet" type="button" data-bind="click: refresh, disable: isLoading">Refresh</button></div>
+    </div>
+    <div class="loading-panel" data-bind="visible: isLoading"><span class="loading-spinner"></span> Loading merchants…</div>
+    <div class="table-wrap" data-bind="visible: !isLoading() && !error() && filteredMerchants().length">
+      <table class="data-table">
+        <thead><tr><th>Merchant</th><th>Category</th><th>Location</th><th>Activity</th><th><span class="sr-only">Actions</span></th></tr></thead>
+        <tbody data-bind="foreach: filteredMerchants">
+          <tr>
+            <td><strong data-bind="text: merchantName"></strong><small data-bind="text: 'ID ' + merchantId"></small></td>
+            <td><span class="category-pill" data-bind="text: category"></span></td>
+            <td data-bind="text: location || '—'"></td>
+            <td><span class="linked-label" data-bind="text: $parent.transactionCount($data) ? $parent.transactionCount($data) + ' transaction(s)' : 'No activity'"></span></td>
+            <td class="row-actions"><button class="text-action" type="button" data-bind="click: $parent.openEdit">Edit</button><button class="text-action text-action-danger" type="button" data-bind="click: $parent.deleteMerchant, disable: $parent.transactionCount($data) > 0">Delete</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="empty-state" data-bind="visible: !isLoading() && !error() && filteredMerchants().length === 0"><strong data-bind="text: searchText() || categoryFilter() !== 'ALL' ? 'No matching merchants' : 'No merchants yet'"></strong><span data-bind="text: searchText() || categoryFilter() !== 'ALL' ? 'Clear a filter or search differently.' : 'Add a merchant before recording a purchase.'"></span></div>
+  </article>
+</section>

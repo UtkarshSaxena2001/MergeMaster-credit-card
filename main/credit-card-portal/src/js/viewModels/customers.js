@@ -1,0 +1,148 @@
+define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUtils, apiModule, appStateModule) {
+  "use strict";
+
+  const { api, maskCardNumber } = apiModule;
+  const appState = appStateModule.appState;
+
+  class CustomersViewModel {
+    constructor() {
+      this.customers = ko.observableArray([]);
+      this.cards = ko.observableArray([]);
+      this.searchText = ko.observable("");
+      this.isLoading = ko.observable(true);
+      this.error = ko.observable("");
+      this.formVisible = ko.observable(false);
+      this.formBusy = ko.observable(false);
+      this.formError = ko.observable("");
+      this.editingId = ko.observable(null);
+      this.customerName = ko.observable("");
+      this.email = ko.observable("");
+      this.mobileNumber = ko.observable("");
+      this.panNumber = ko.observable("");
+      this.filteredCustomers = ko.pureComputed(() => {
+        const query = this.searchText().trim().toLowerCase();
+        if (!query) return this.customers();
+        return this.customers().filter((customer) =>
+          [customer.customerName, customer.email, customer.mobileNumber, customer.panNumber]
+            .some((value) => String(value || "").toLowerCase().includes(query)));
+      });
+      this.isEditing = ko.pureComputed(() => this.editingId() !== null);
+      this.refresh = async () => {
+        this.isLoading(true);
+        this.error("");
+        try {
+          const [customers, cards] = await Promise.all([api.getCustomers(), api.getCards()]);
+          this.customers(customers);
+          this.cards(cards);
+        } catch (error) {
+          this.error(error instanceof Error ? error.message : "Unable to load customers.");
+        } finally {
+          this.isLoading(false);
+        }
+      };
+      this.openCreate = () => {
+        this.editingId(null);
+        this.resetForm();
+        this.formVisible(true);
+      };
+      this.openEdit = (customer) => {
+        this.editingId(customer.customerId);
+        this.customerName(customer.customerName);
+        this.email(customer.email);
+        this.mobileNumber(customer.mobileNumber);
+        this.panNumber(customer.panNumber);
+        this.formError("");
+        this.formVisible(true);
+      };
+      this.closeForm = () => {
+        this.formVisible(false);
+        this.formError("");
+        this.editingId(null);
+      };
+      this.submitForm = (_form, event) => {
+        event.preventDefault();
+        void this.save();
+        return false;
+      };
+      this.deleteCustomer = async (customer) => {
+        if (this.isLinkedToCard(customer)) {
+          appState.notify("This customer has an issued card. Remove or reassign the card before deleting them.", "error");
+          return;
+        }
+        if (!window.confirm(`Delete ${customer.customerName} from the customer directory?`)) return;
+        try {
+          await api.deleteCustomer(customer.customerId);
+          appState.notify("Customer deleted.", "success");
+          await this.refresh();
+        } catch (error) {
+          appState.notify(error instanceof Error ? error.message : "Customer could not be deleted.", "error");
+        }
+      };
+      this.isLinkedToCard = (customer) => this.linkedCards(customer).length > 0;
+      this.linkedCards = (customer) => this.cards().filter(
+        (card) => Number(card.customerId) === Number(customer.customerId));
+      this.linkedCardLabel = (customer) => {
+        const linked = this.linkedCards(customer);
+        if (!linked.length) return "No cards issued";
+        const preview = linked.slice(0, 2).map((card) => maskCardNumber(card.cardNumber)).join(", ");
+        return `${linked.length} card${linked.length === 1 ? "" : "s"}: ${preview}`;
+      };
+    }
+
+    connected() {
+      AccUtils.announce("Customers page loaded.");
+      document.title = "MergeMaster | Customers";
+      void this.refresh();
+    }
+
+    async save() {
+      const input = {
+        customerName: this.customerName().trim(),
+        email: this.email().trim(),
+        mobileNumber: this.mobileNumber().trim(),
+        panNumber: this.panNumber().trim().toUpperCase()
+      };
+      const validationError = this.validate(input);
+      if (validationError) {
+        this.formError(validationError);
+        return;
+      }
+      this.formBusy(true);
+      this.formError("");
+      try {
+        const id = this.editingId();
+        if (id === null) {
+          await api.createCustomer(input);
+          appState.notify("Customer added to the directory.", "success");
+        } else {
+          await api.updateCustomer(id, input);
+          appState.notify("Customer details updated.", "success");
+        }
+        this.closeForm();
+        await this.refresh();
+      } catch (error) {
+        this.formError(error instanceof Error ? error.message : "Customer could not be saved.");
+      } finally {
+        this.formBusy(false);
+      }
+    }
+
+    resetForm() {
+      this.customerName("");
+      this.email("");
+      this.mobileNumber("");
+      this.panNumber("");
+      this.formError("");
+    }
+
+    validate(input) {
+      if (input.customerName.length < 2) return "Enter a customer name of at least two characters.";
+      if (!/^\S+@\S+\.\S+$/.test(input.email)) return "Enter a valid email address.";
+      if (!/^\d{10,15}$/.test(input.mobileNumber)) return "Mobile number must contain 10 to 15 digits.";
+      if (!/^[A-Z]{5}\d{4}[A-Z]$/.test(input.panNumber)) return "PAN must follow the format ABCDE1234F.";
+      return "";
+    }
+  }
+
+  return CustomersViewModel;
+});

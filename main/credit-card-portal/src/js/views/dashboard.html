@@ -1,0 +1,127 @@
+<section class="page-shell dashboard-page">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">Credit operations workspace</p>
+      <h1>Portfolio overview</h1>
+      <p class="page-subtitle">See customers, cards and account activity in one clear view.</p>
+    </div>
+    <button class="button button-secondary" type="button" data-bind="click: refresh, disable: isLoading">
+      <span class="button-icon">↻</span> Refresh data
+    </button>
+  </header>
+
+  <div class="status-panel status-panel-error" data-bind="visible: error">
+    <strong>Couldn’t load the portfolio.</strong>
+    <span data-bind="text: error"></span>
+    <button class="link-button" type="button" data-bind="click: refresh">Try again</button>
+  </div>
+
+  <div class="loading-panel" data-bind="visible: isLoading">
+    <span class="loading-spinner" aria-hidden="true"></span>
+    Loading live portfolio data…
+  </div>
+
+  <div data-bind="visible: !isLoading() && !error()">
+    <div class="metric-grid">
+      <article class="metric-card metric-card-strong">
+        <div class="metric-label">Total credit limit</div>
+        <div class="metric-value" data-bind="text: formatCurrency(totalCreditLimit())"></div>
+        <div class="metric-footnote"><span data-bind="text: cardCount"></span> managed cards</div>
+      </article>
+      <article class="metric-card">
+        <div class="metric-label">Available credit</div>
+        <div class="metric-value" data-bind="text: formatCurrency(totalAvailableCredit())"></div>
+        <div class="metric-footnote"><span data-bind="text: activeCards"></span> active cards</div>
+      </article>
+      <article class="metric-card">
+        <div class="metric-label">Outstanding balance</div>
+        <div class="metric-value" data-bind="text: formatCurrency(totalOutstanding())"></div>
+        <div class="metric-footnote"><span data-bind="text: utilization"></span>% portfolio utilization</div>
+      </article>
+      <article class="metric-card">
+        <div class="metric-label">Activity recorded</div>
+        <div class="metric-value" data-bind="text: transactionCount"></div>
+        <div class="metric-footnote">successful transactions</div>
+      </article>
+    </div>
+
+    <div class="dashboard-grid">
+      <article class="surface-card portfolio-card">
+        <div class="surface-card-header">
+          <div>
+            <p class="eyebrow">Credit health</p>
+            <h2>Portfolio utilization</h2>
+          </div>
+          <span class="usage-value"><span data-bind="text: utilization"></span>% used</span>
+        </div>
+        <div class="usage-track" aria-label="Credit utilization">
+          <div class="usage-fill" data-bind="style: { width: utilization() + '%' }"></div>
+        </div>
+        <div class="usage-key">
+          <span><i class="usage-dot usage-dot-used"></i> Outstanding <strong data-bind="text: formatCurrency(totalOutstanding())"></strong></span>
+          <span><i class="usage-dot usage-dot-free"></i> Available <strong data-bind="text: formatCurrency(totalAvailableCredit())"></strong></span>
+        </div>
+        <div class="portfolio-highlight" data-bind="if: topCard">
+          <span>Highest card balance</span>
+          <strong data-bind="text: maskCardNumber(topCard() && topCard().cardNumber)"></strong>
+          <span data-bind="text: formatCurrency(topCard() && topCard().outstandingAmount)"></span>
+        </div>
+        <div class="empty-inline" data-bind="visible: !topCard()">Issue your first card to begin tracking utilization.</div>
+      </article>
+
+      <article class="surface-card quick-actions-card">
+        <div class="surface-card-header">
+          <div>
+            <p class="eyebrow">Get things done</p>
+            <h2>Quick actions</h2>
+          </div>
+        </div>
+        <button class="quick-action" type="button" data-bind="click: function() { navigate('transactions'); }">
+          <span class="quick-action-icon">₹</span>
+          <span><strong>Post a transaction</strong><small>Record a purchase or payment</small></span>
+          <span class="quick-action-arrow">→</span>
+        </button>
+        <button class="quick-action" type="button" data-bind="click: function() { navigate('cards'); }">
+          <span class="quick-action-icon">▣</span>
+          <span><strong>Issue a card</strong><small>Set a limit for an existing customer</small></span>
+          <span class="quick-action-arrow">→</span>
+        </button>
+        <button class="quick-action" type="button" data-bind="click: function() { navigate('customers'); }">
+          <span class="quick-action-icon">+</span>
+          <span><strong>Add a customer</strong><small>Grow your customer directory</small></span>
+          <span class="quick-action-arrow">→</span>
+        </button>
+      </article>
+    </div>
+
+    <article class="surface-card activity-card">
+      <div class="surface-card-header">
+        <div>
+          <p class="eyebrow">Latest activity</p>
+          <h2>Recent transactions</h2>
+        </div>
+        <button class="link-button" type="button" data-bind="click: function() { navigate('transactions'); }">View all activity</button>
+      </div>
+      <div class="activity-list" data-bind="foreach: recentTransactions">
+        <div class="activity-row">
+          <div class="activity-symbol" data-bind="css: transactionClass($data), text: transactionType === 'PAYMENT' ? '↓' : '↑'"></div>
+          <div class="activity-copy">
+            <strong data-bind="text: transactionLabel($data)"></strong>
+            <span><span data-bind="text: maskCardNumber(cardNumber)"></span> · <span data-bind="text: formatDateTime(transactionDateTime)"></span></span>
+          </div>
+          <div class="activity-amount" data-bind="css: transactionClass($data), text: formatCurrency(amount)"></div>
+        </div>
+      </div>
+      <div class="empty-state compact-empty" data-bind="visible: recentTransactions().length === 0">
+        <strong>No activity yet</strong>
+        <span>Post a purchase or payment to start building the ledger.</span>
+      </div>
+    </article>
+
+    <div class="overview-strip">
+      <span><strong data-bind="text: customerCount"></strong> customers</span>
+      <span><strong data-bind="text: merchantCount"></strong> merchant partners</span>
+      <span class="connection-pill"><i></i> API connected</span>
+    </div>
+  </div>
+</section>
