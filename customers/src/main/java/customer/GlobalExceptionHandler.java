@@ -10,7 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice(name = "customerExceptionHandler")
+@RestControllerAdvice(name = "customerExceptionHandler", basePackages = "customer")
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomerNotFoundException.class)

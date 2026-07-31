@@ -13,6 +13,13 @@
     <button class="link-button" type="button" data-bind="click: refresh">Try again</button>
   </div>
 
+  <div class="status-panel" data-bind="css: { 'status-panel-error': databaseStatus().status !== 'UP' }">
+    <strong data-bind="text: databaseStatus().status === 'UP' ? 'API connected' : 'API not connected'"></strong>
+    <span data-bind="text: databaseStatus().database + (databaseStatus().service ? ' / ' + databaseStatus().service : '')"></span>
+    <span data-bind="text: 'Endpoint: ' + (databaseStatus().apiBaseUrl || 'same origin')"></span>
+    <button class="link-button" type="button" data-bind="click: refresh">Refresh</button>
+  </div>
+
   <div class="surface-card form-card" data-bind="visible: formVisible">
     <div class="surface-card-header">
       <div>

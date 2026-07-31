@@ -1,7 +1,7 @@
 define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUtils, apiModule, appStateModule) {
   "use strict";
 
-  const { api, maskCardNumber } = apiModule;
+  const { api, asArray, maskCardNumber } = apiModule;
   const appState = appStateModule.appState;
 
   class CustomersViewModel {
@@ -14,6 +14,12 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
       this.formVisible = ko.observable(false);
       this.formBusy = ko.observable(false);
       this.formError = ko.observable("");
+      this.databaseStatus = ko.observable({
+        status: "CHECKING",
+        database: "Unknown",
+        service: "",
+        apiBaseUrl: api.getApiBaseUrl()
+      });
       this.editingId = ko.observable(null);
       this.customerName = ko.observable("");
       this.email = ko.observable("");
@@ -32,8 +38,9 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
         this.error("");
         try {
           const [customers, cards] = await Promise.all([api.getCustomers(), api.getCards()]);
-          this.customers(customers);
-          this.cards(cards);
+          this.customers(asArray(customers));
+          this.cards(asArray(cards));
+          await this.refreshDatabaseStatus();
         } catch (error) {
           this.error(error instanceof Error ? error.message : "Unable to load customers.");
         } finally {
@@ -60,7 +67,7 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
         this.editingId(null);
       };
       this.submitForm = (_form, event) => {
-        event.preventDefault();
+        if (event && typeof event.preventDefault === "function") event.preventDefault();
         void this.save();
         return false;
       };
@@ -124,6 +131,23 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
         this.formError(error instanceof Error ? error.message : "Customer could not be saved.");
       } finally {
         this.formBusy(false);
+      }
+    }
+
+    async refreshDatabaseStatus() {
+      try {
+        const status = await api.getDatabaseStatus();
+        this.databaseStatus({
+          ...status,
+          apiBaseUrl: api.getApiBaseUrl()
+        });
+      } catch (error) {
+        this.databaseStatus({
+          status: "DOWN",
+          database: "Unavailable",
+          service: "",
+          apiBaseUrl: api.getApiBaseUrl()
+        });
       }
     }
 

@@ -1,7 +1,7 @@
 define(["knockout", "../accUtils", "../api"], function (ko, AccUtils, apiModule) {
   "use strict";
 
-  const { api, formatCurrency, formatDateTime, maskCardNumber } = apiModule;
+  const { api, asArray, formatCurrency, formatDateTime, maskCardNumber } = apiModule;
 
   class DashboardViewModel {
     constructor() {
@@ -16,26 +16,26 @@ define(["knockout", "../accUtils", "../api"], function (ko, AccUtils, apiModule)
       });
       this.isLoading = ko.observable(true);
       this.error = ko.observable("");
-      this.customerCount = ko.pureComputed(() => this.customers().length);
-      this.cardCount = ko.pureComputed(() => this.cards().length);
-      this.merchantCount = ko.pureComputed(() => this.merchants().length);
-      this.transactionCount = ko.pureComputed(() => this.transactions().length);
+      this.customerCount = ko.pureComputed(() => asArray(this.customers()).length);
+      this.cardCount = ko.pureComputed(() => asArray(this.cards()).length);
+      this.merchantCount = ko.pureComputed(() => asArray(this.merchants()).length);
+      this.transactionCount = ko.pureComputed(() => asArray(this.transactions()).length);
       this.totalCreditLimit = ko.pureComputed(() =>
-        this.cards().reduce((sum, card) => sum + Number(card.creditLimit || 0), 0));
+        asArray(this.cards()).reduce((sum, card) => sum + Number(card.creditLimit || 0), 0));
       this.totalAvailableCredit = ko.pureComputed(() =>
-        this.cards().reduce((sum, card) => sum + Number(card.availableCredit || 0), 0));
+        asArray(this.cards()).reduce((sum, card) => sum + Number(card.availableCredit || 0), 0));
       this.totalOutstanding = ko.pureComputed(() =>
-        this.cards().reduce((sum, card) => sum + Number(card.outstandingAmount || 0), 0));
+        asArray(this.cards()).reduce((sum, card) => sum + Number(card.outstandingAmount || 0), 0));
       this.utilization = ko.pureComputed(() => {
         const limit = this.totalCreditLimit();
         return limit ? Math.min(100, Math.round((this.totalOutstanding() / limit) * 100)) : 0;
       });
       this.activeCards = ko.pureComputed(() =>
-        this.cards().filter((card) => card.cardStatus === "ACTIVE").length);
-      this.recentTransactions = ko.pureComputed(() => [...this.transactions()]
+        asArray(this.cards()).filter((card) => card.cardStatus === "ACTIVE").length);
+      this.recentTransactions = ko.pureComputed(() => [...asArray(this.transactions())]
         .sort((left, right) => new Date(right.transactionDateTime).getTime() - new Date(left.transactionDateTime).getTime())
         .slice(0, 6));
-      this.topCard = ko.pureComputed(() => [...this.cards()].sort(
+      this.topCard = ko.pureComputed(() => [...asArray(this.cards())].sort(
         (left, right) => Number(right.outstandingAmount) - Number(left.outstandingAmount)
       )[0]);
       this.databaseLabel = ko.pureComputed(() => {
@@ -62,10 +62,10 @@ define(["knockout", "../accUtils", "../api"], function (ko, AccUtils, apiModule)
               service: ""
             }))
           ]);
-          this.customers(customers);
-          this.cards(cards);
-          this.merchants(merchants);
-          this.transactions(transactions);
+          this.customers(asArray(customers));
+          this.cards(asArray(cards));
+          this.merchants(asArray(merchants));
+          this.transactions(asArray(transactions));
           this.databaseStatus(databaseStatus);
         } catch (error) {
           this.error(error instanceof Error ? error.message : "Unable to load dashboard data.");

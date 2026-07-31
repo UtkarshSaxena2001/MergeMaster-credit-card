@@ -55,7 +55,12 @@ define([], function () {
     return { body: JSON.stringify(value) };
   }
 
+  function asArray(value) {
+    return Array.isArray(value) ? value : [];
+  }
+
   const api = {
+    getApiBaseUrl: apiBaseUrl,
     getDatabaseStatus: () => request("/api/system/database"),
 
     getCustomers: () => request("/api/customers"),
@@ -92,11 +97,11 @@ define([], function () {
 
   function maskCardNumber(cardNumber) {
     const digits = String(cardNumber || "").replace(/\s/g, "");
-    return digits.length < 8 ? digits : `•••• ${digits.slice(-4)}`;
+    return digits.length < 8 ? digits : `**** ${digits.slice(-4)}`;
   }
 
   function formatDate(value) {
-    if (!value) return "—";
+    if (!value) return "-";
     const date = new Date(value);
     return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat("en-IN", {
       day: "2-digit", month: "short", year: "numeric"
@@ -104,12 +109,12 @@ define([], function () {
   }
 
   function formatDateTime(value) {
-    if (!value) return "—";
+    if (!value) return "-";
     const date = new Date(value);
     return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat("en-IN", {
       day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"
     }).format(date);
   }
 
-  return { api, ApiError, formatCurrency, formatDate, formatDateTime, maskCardNumber };
+  return { api, ApiError, asArray, formatCurrency, formatDate, formatDateTime, maskCardNumber };
 });

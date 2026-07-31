@@ -1,7 +1,7 @@
 define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUtils, apiModule, appStateModule) {
   "use strict";
 
-  const { api, formatCurrency, formatDate, maskCardNumber } = apiModule;
+  const { api, asArray, formatCurrency, formatDate, maskCardNumber } = apiModule;
   const appState = appStateModule.appState;
 
   class CardsViewModel {
@@ -69,8 +69,8 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
         this.error("");
         try {
           const [cards, customers] = await Promise.all([api.getCards(), api.getCustomers()]);
-          this.cards(cards);
-          this.customers(customers);
+          this.cards(asArray(cards));
+          this.customers(asArray(customers));
         } catch (error) {
           this.error(error instanceof Error ? error.message : "Unable to load cards.");
         } finally {
@@ -101,7 +101,7 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
         this.editingCardNumber(null);
       };
       this.submitForm = (_form, event) => {
-        event.preventDefault();
+        if (event && typeof event.preventDefault === "function") event.preventDefault();
         void this.save();
         return false;
       };

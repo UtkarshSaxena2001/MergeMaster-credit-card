@@ -1,7 +1,7 @@
 define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUtils, apiModule, appStateModule) {
   "use strict";
 
-  const { api, formatCurrency, formatDateTime, maskCardNumber } = apiModule;
+  const { api, asArray, formatCurrency, formatDateTime, maskCardNumber } = apiModule;
   const appState = appStateModule.appState;
 
   class TransactionsViewModel {
@@ -66,9 +66,9 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
           const [transactions, cards, merchants] = await Promise.all([
             api.getTransactions(), api.getCards(), api.getMerchants()
           ]);
-          this.transactions(transactions);
-          this.cards(cards);
-          this.merchants(merchants);
+          this.transactions(asArray(transactions));
+          this.cards(asArray(cards));
+          this.merchants(asArray(merchants));
         } catch (error) {
           this.error(error instanceof Error ? error.message : "Unable to load transactions.");
         } finally {
@@ -81,7 +81,7 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
         if (type === "PAYMENT") this.merchantId("");
       };
       this.submitForm = (_form, event) => {
-        event.preventDefault();
+        if (event && typeof event.preventDefault === "function") event.preventDefault();
         void this.postTransaction();
         return false;
       };

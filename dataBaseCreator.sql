@@ -66,4 +66,4 @@ CREATE TABLE transactions (
 );
 
 
-select * from customer;
+select * from transactions;

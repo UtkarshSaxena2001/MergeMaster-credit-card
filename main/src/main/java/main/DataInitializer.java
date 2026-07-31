@@ -2,6 +2,7 @@ package main;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -9,6 +10,7 @@ import customer.Customer;
 import customer.CustomerRepository;
 
 @Component
+@ConditionalOnProperty(name = "app.seed-sample-data", havingValue = "true")
 public class DataInitializer implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);

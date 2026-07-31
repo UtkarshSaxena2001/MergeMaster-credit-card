@@ -8,20 +8,34 @@ This is a Maven multi-module Spring Boot project. The `main` module starts the i
 2. Use Java 17.
 3. Run `main.MainApp`.
 
-From a terminal, build the reactor first and then start only the integrated
-`main` module:
+From a terminal, set the Oracle credentials through environment variables, build
+the reactor first, and then start only the integrated `main` module:
 
 ```powershell
+$env:JAVA_HOME = 'C:\Program Files\Eclipse Adoptium\jdk-17.0.19.10-hotspot'
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+$env:ORACLE_DB_URL = 'jdbc:oracle:thin:@//localhost:1521/FREE'
+$env:ORACLE_DB_USERNAME = 'SYSTEM'
+$secure = Read-Host 'Oracle password' -AsSecureString
+$env:ORACLE_DB_PASSWORD = ([pscredential]::new($env:ORACLE_DB_USERNAME, $secure)).GetNetworkCredential().Password
+
 mvn -f .\pom.xml -pl main -am clean install -DskipTests
 if ($LASTEXITCODE -ne 0) { throw 'Backend build failed' }
 mvn -f .\main\pom.xml spring-boot:run
+```
+
+If `mvn` is not on your PATH, use the included helper from the repository root:
+
+```powershell
+.\run-backend.ps1
 ```
 
 Do not combine `spring-boot:run` with `-am`: Maven would apply the Spring Boot
 goal to the root aggregator first, and that POM intentionally has no main
 class.
 
-The integrated application starts on `http://localhost:8080` using an in-memory H2 database. H2 Console is available at `/h2-console`.
+The integrated application starts on `http://localhost:8080` and validates the
+existing Oracle FREE schema. H2 is used only by automated tests.
 
 ## Oracle JET portal
 

@@ -17,10 +17,15 @@
     // will implicitly add a busy state, until the application calls applicationBootstrapComplete
     // on the busy state context.
     window["oj_whenReady"] = true;
+    var appBuildToken = String(Date.now());
 
     requirejs.config(
     {
       baseUrl: 'js',
+      waitSeconds: 0,
+      urlArgs: function (id, url) {
+        return url.indexOf('/libs/') === -1 ? '?v=' + appBuildToken : '';
+      },
 
       paths:
       /* DO NOT MODIFY

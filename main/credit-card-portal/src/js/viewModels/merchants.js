@@ -1,7 +1,7 @@
 define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUtils, apiModule, appStateModule) {
   "use strict";
 
-  const api = apiModule.api;
+  const { api, asArray } = apiModule;
   const appState = appStateModule.appState;
 
   class MerchantsViewModel {
@@ -39,8 +39,8 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
         this.error("");
         try {
           const [merchants, transactions] = await Promise.all([api.getMerchants(), api.getTransactions()]);
-          this.merchants(merchants);
-          this.transactions(transactions);
+          this.merchants(asArray(merchants));
+          this.transactions(asArray(transactions));
         } catch (error) {
           this.error(error instanceof Error ? error.message : "Unable to load merchants.");
         } finally {
@@ -69,7 +69,7 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
         this.editingId(null);
       };
       this.submitForm = (_form, event) => {
-        event.preventDefault();
+        if (event && typeof event.preventDefault === "function") event.preventDefault();
         void this.save();
         return false;
       };

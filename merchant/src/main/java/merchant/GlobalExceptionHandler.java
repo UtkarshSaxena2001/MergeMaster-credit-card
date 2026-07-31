@@ -10,7 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice(name = "merchantExceptionHandler")
+@RestControllerAdvice(name = "merchantExceptionHandler", basePackages = "merchant")
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MerchantNotFoundException.class)

@@ -104,12 +104,12 @@
       </div>
       <div class="activity-list" data-bind="foreach: recentTransactions">
         <div class="activity-row">
-          <div class="activity-symbol" data-bind="css: transactionClass($data), text: transactionType === 'PAYMENT' ? '↓' : '↑'"></div>
+          <div class="activity-symbol" data-bind="css: $parent.transactionClass($data), text: transactionType === 'PAYMENT' ? '↓' : '↑'"></div>
           <div class="activity-copy">
-            <strong data-bind="text: transactionLabel($data)"></strong>
-            <span><span data-bind="text: maskCardNumber(cardNumber)"></span> · <span data-bind="text: formatDateTime(transactionDateTime)"></span></span>
+            <strong data-bind="text: $parent.transactionLabel($data)"></strong>
+            <span><span data-bind="text: $parent.maskCardNumber(cardNumber)"></span> · <span data-bind="text: $parent.formatDateTime(transactionDateTime)"></span></span>
           </div>
-          <div class="activity-amount" data-bind="css: transactionClass($data), text: formatCurrency(amount)"></div>
+          <div class="activity-amount" data-bind="css: $parent.transactionClass($data), text: $parent.formatCurrency(amount)"></div>
         </div>
       </div>
       <div class="empty-state compact-empty" data-bind="visible: recentTransactions().length === 0">
