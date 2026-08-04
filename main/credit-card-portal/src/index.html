@@ -4,7 +4,7 @@
     <title>MergeMaster Credit Operations</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#101b3d">
+    <meta name="theme-color" content="#c74634">
     <link rel="icon" href="css/images/JET-Favicon-Red-32x32.png" type="image/x-icon">
 
     <!-- injector:theme -->
@@ -19,6 +19,14 @@
     </script>
 
     <div id="globalBody">
+      <div class="ambient-layer" aria-hidden="true">
+        <span class="ambient-orb ambient-orb-one"></span>
+        <span class="ambient-orb ambient-orb-two"></span>
+        <span class="ambient-orb ambient-orb-three"></span>
+        <span class="ambient-grid"></span>
+      </div>
+      <span id="cursorDot" class="cursor-dot" aria-hidden="true"></span>
+      <span id="cursorRing" class="cursor-ring" aria-hidden="true"></span>
       <div id="announce" tabindex="-1" class="send-off-screen" :aria-live="[[manner]]" aria-atomic="true"><p><oj-bind-text value="[[message]]"></oj-bind-text></p></div>
 
       <div class="app-toast" role="status" aria-live="polite" data-bind="visible: toastVisible, css: 'app-toast app-toast-' + toastKind()">
@@ -35,7 +43,7 @@
         <header role="banner" class="app-header">
           <div class="app-header-inner">
             <button id="drawerToggleButton" class="drawer-toggle" type="button" aria-label="Open navigation" data-bind="click: toggleDrawer">☰</button>
-            <a class="app-brand" href="?root=dashboard" aria-label="MergeMaster dashboard"><span class="brand-mark">M</span><span><strong data-bind="text: appName"></strong><small>Credit operations</small></span></a>
+            <a class="app-brand" href="?root=dashboard" aria-label="MergeMaster dashboard"><span class="brand-mark">M</span><span><strong data-bind="text: appName"></strong><small>Oracle Red credit operations</small></span><span class="oracle-lockup"><img src="css/images/oracle_logo.svg" alt="Oracle"></span></a>
             <div class="header-spacer"></div>
             <div class="header-user"><span class="header-user-dot"></span><span data-bind="text: userLogin"></span></div>
           </div>

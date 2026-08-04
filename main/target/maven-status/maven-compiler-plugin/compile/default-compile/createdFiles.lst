@@ -1,3 +1,7 @@
+main\CorsFilterConfig$1.class
 main\ApiCorsConfiguration.class
+main\CorsFilterConfig.class
 main\DatabaseStatusController.class
+main\DataInitializer.class
+main\HomeController.class
 main\MainApp.class
