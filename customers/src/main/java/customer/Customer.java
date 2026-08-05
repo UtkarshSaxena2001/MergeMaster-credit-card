@@ -19,6 +19,9 @@ public class Customer {
     @Column(name = "CUSTOMER_NAME", nullable = false, length = 100)
     private String customerName;
 
+    @Column(name = "PASSWORD", nullable = false, length = 100)
+    private String password;
+
     @Column(name = "EMAIL", nullable = false, unique = true, length = 100)
     private String email;
 
@@ -45,6 +48,14 @@ public class Customer {
 
     public void setCustomerName(String customerName) {
         this.customerName = customerName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getEmail() {

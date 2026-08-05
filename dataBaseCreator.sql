@@ -1,6 +1,7 @@
 CREATE TABLE customer (
     customer_id NUMBER(7) GENERATED ALWAYS AS IDENTITY,
     customer_name VARCHAR2(100) NOT NULL,
+    password VARCHAR2(100) NOT NULL,
     email VARCHAR2(100) NOT NULL,
     mobile_number VARCHAR2(15) NOT NULL,
     pan_number VARCHAR2(10) NOT NULL,
@@ -67,3 +68,7 @@ CREATE TABLE transactions (
 
 
 select * from transactions;
+
+ALTER TABLE customer ADD password VARCHAR2(100);
+UPDATE customer SET password = customer_name WHERE password IS NULL;
+ALTER TABLE customer MODIFY password NOT NULL;

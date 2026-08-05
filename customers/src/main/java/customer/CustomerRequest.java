@@ -11,6 +11,9 @@ public class CustomerRequest {
     @Size(min = 2, max = 100, message = "Customer name must be between 2 and 100 characters")
     private String customerName;
 
+    @Size(max = 100, message = "Password cannot exceed 100 characters")
+    private String password;
+
     @NotBlank(message = "Email is required")
     @Email(message = "Enter a valid email address")
     @Size(max = 100, message = "Email cannot exceed 100 characters")
@@ -33,6 +36,14 @@ public class CustomerRequest {
 
     public void setCustomerName(String customerName) {
         this.customerName = customerName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getEmail() {

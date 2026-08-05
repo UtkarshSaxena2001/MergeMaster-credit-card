@@ -64,6 +64,16 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
       this.formatCurrency = formatCurrency;
       this.formatDate = formatDate;
       this.maskCardNumber = maskCardNumber;
+      this.cardTileClass = (card) => {
+        const cardType = String(card.cardType || "").trim().toUpperCase();
+        const cardStatus = String(card.cardStatus || "").trim().toUpperCase();
+        return {
+          "credit-card-tile-blocked": cardStatus === "BLOCKED",
+          "credit-card-tile-silver": cardType === "SILVER",
+          "credit-card-tile-gold": cardType === "GOLD",
+          "credit-card-tile-platinum": cardType === "PLATINUM"
+        };
+      };
       this.refresh = async () => {
         this.isLoading(true);
         this.error("");

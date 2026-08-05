@@ -13,6 +13,11 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
       this.error = ko.observable("");
       this.formBusy = ko.observable(false);
       this.formError = ko.observable("");
+      this.isCustomer = appState.isCustomer;
+      this.transactionPageTitle = ko.pureComputed(() => this.isCustomer() ? "My transactions" : "Transaction workspace");
+      this.transactionPageSubtitle = ko.pureComputed(() => this.isCustomer()
+        ? "Review activity recorded against cards linked to your account."
+        : "Post purchases and payments with real-time credit safeguards.");
       this.transactionType = ko.observable("PURCHASE");
       this.cardNumber = ko.observable("");
       this.merchantId = ko.observable("");
@@ -66,9 +71,17 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
           const [transactions, cards, merchants] = await Promise.all([
             api.getTransactions(), api.getCards(), api.getMerchants()
           ]);
-          this.transactions(asArray(transactions));
-          this.cards(asArray(cards));
-          this.merchants(asArray(merchants));
+          const allTransactions = asArray(transactions);
+          const allCards = asArray(cards);
+          const scopedTransactions = appState.scopeTransactions(allTransactions, allCards);
+          const merchantIds = new Set(scopedTransactions
+            .filter((transaction) => transaction.merchantId !== null && transaction.merchantId !== undefined)
+            .map((transaction) => Number(transaction.merchantId)));
+          this.transactions(scopedTransactions);
+          this.cards(appState.scopeCards(allCards));
+          this.merchants(this.isCustomer()
+            ? asArray(merchants).filter((merchant) => merchantIds.has(Number(merchant.merchantId)))
+            : asArray(merchants));
         } catch (error) {
           this.error(error instanceof Error ? error.message : "Unable to load transactions.");
         } finally {
@@ -102,12 +115,16 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
     }
 
     connected() {
-      AccUtils.announce("Transactions page loaded.");
-      document.title = "MergeMaster | Transactions";
+      AccUtils.announce(this.isCustomer() ? "My transactions loaded." : "Transactions page loaded.");
+      document.title = this.isCustomer() ? "MergeMaster | My transactions" : "MergeMaster | Transactions";
       void this.refresh();
     }
 
     async postTransaction() {
+      if (this.isCustomer()) {
+        this.formError("Customer accounts are read-only. Contact Credit Operations to request a transaction or payment.");
+        return;
+      }
       const card = this.selectedCard();
       const amount = Number(this.amount());
       const type = this.transactionType();

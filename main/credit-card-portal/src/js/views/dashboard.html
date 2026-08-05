@@ -1,24 +1,24 @@
 <section class="page-shell dashboard-page">
   <header class="page-heading">
     <div>
-      <p class="eyebrow">Credit operations workspace</p>
-      <h1>Portfolio overview</h1>
-      <p class="page-subtitle">See customers, cards and account activity in one clear view.</p>
+      <p class="eyebrow" data-bind="text: dashboardEyebrow"></p>
+      <h1 data-bind="text: dashboardTitle"></h1>
+      <p class="page-subtitle" data-bind="text: dashboardSubtitle"></p>
     </div>
     <button class="button button-secondary" type="button" data-bind="click: refresh, disable: isLoading">
-      <span class="button-icon">↻</span> Refresh data
+      <span class="button-icon" aria-hidden="true">&#x21bb;</span> Refresh data
     </button>
   </header>
 
   <div class="status-panel status-panel-error" data-bind="visible: error">
-    <strong>Couldn’t load the portfolio.</strong>
+    <strong>Could not load the dashboard.</strong>
     <span data-bind="text: error"></span>
     <button class="link-button" type="button" data-bind="click: refresh">Try again</button>
   </div>
 
   <div class="loading-panel" data-bind="visible: isLoading">
     <span class="loading-spinner" aria-hidden="true"></span>
-    Loading live portfolio data…
+    Loading live account data...
   </div>
 
   <div data-bind="visible: !isLoading() && !error()">
@@ -26,17 +26,17 @@
       <article class="metric-card metric-card-strong">
         <div class="metric-label">Total credit limit</div>
         <div class="metric-value" data-bind="text: formatCurrency(totalCreditLimit())"></div>
-        <div class="metric-footnote"><span data-bind="text: cardCount"></span> managed cards</div>
+        <div class="metric-footnote"><span data-bind="text: cardCount"></span> <span data-bind="text: isCustomer() ? 'cards on your account' : 'managed cards'"></span></div>
       </article>
       <article class="metric-card">
         <div class="metric-label">Available credit</div>
         <div class="metric-value" data-bind="text: formatCurrency(totalAvailableCredit())"></div>
-        <div class="metric-footnote"><span data-bind="text: activeCards"></span> active cards</div>
+        <div class="metric-footnote"><span data-bind="text: activeCards"></span> active card<span data-bind="text: activeCards() === 1 ? '' : 's'"></span></div>
       </article>
       <article class="metric-card">
         <div class="metric-label">Outstanding balance</div>
         <div class="metric-value" data-bind="text: formatCurrency(totalOutstanding())"></div>
-        <div class="metric-footnote"><span data-bind="text: utilization"></span>% portfolio utilization</div>
+        <div class="metric-footnote"><span data-bind="text: utilization"></span>% <span data-bind="text: isCustomer() ? 'account utilization' : 'portfolio utilization'"></span></div>
       </article>
       <article class="metric-card">
         <div class="metric-label">Activity recorded</div>
@@ -50,7 +50,7 @@
         <div class="surface-card-header">
           <div>
             <p class="eyebrow">Credit health</p>
-            <h2>Portfolio utilization</h2>
+            <h2 data-bind="text: isCustomer() ? 'Your credit utilization' : 'Portfolio utilization'"></h2>
           </div>
           <span class="usage-value"><span data-bind="text: utilization"></span>% used</span>
         </div>
@@ -66,65 +66,115 @@
           <strong data-bind="text: maskCardNumber(topCard() && topCard().cardNumber)"></strong>
           <span data-bind="text: formatCurrency(topCard() && topCard().outstandingAmount)"></span>
         </div>
-        <div class="empty-inline" data-bind="visible: !topCard()">Issue your first card to begin tracking utilization.</div>
+        <div class="empty-inline" data-bind="visible: !topCard(), text: isCustomer() ? 'No cards are currently linked to your account.' : 'Issue your first card to begin tracking utilization.'"></div>
       </article>
 
       <article class="surface-card quick-actions-card">
         <div class="surface-card-header">
           <div>
             <p class="eyebrow">Get things done</p>
-            <h2>Quick actions</h2>
+            <h2 data-bind="text: isCustomer() ? 'Your account' : 'Quick actions'"></h2>
           </div>
         </div>
+        <!-- ko if: isCustomer -->
         <button class="quick-action" type="button" data-bind="click: function() { navigate('transactions'); }">
-          <span class="quick-action-icon">₹</span>
+          <span class="quick-action-icon" aria-hidden="true">&#8594;</span>
+          <span><strong>View my transactions</strong><small>Review activity recorded against your cards</small></span>
+          <span class="quick-action-arrow" aria-hidden="true">&#8594;</span>
+        </button>
+        <!-- /ko -->
+        <!-- ko ifnot: isCustomer -->
+        <button class="quick-action" type="button" data-bind="click: function() { navigate('transactions'); }">
+          <span class="quick-action-icon" aria-hidden="true">&#8377;</span>
           <span><strong>Post a transaction</strong><small>Record a purchase or payment</small></span>
-          <span class="quick-action-arrow">→</span>
+          <span class="quick-action-arrow" aria-hidden="true">&#8594;</span>
         </button>
         <button class="quick-action" type="button" data-bind="click: function() { navigate('cards'); }">
-          <span class="quick-action-icon">▣</span>
+          <span class="quick-action-icon" aria-hidden="true">&#9642;</span>
           <span><strong>Issue a card</strong><small>Set a limit for an existing customer</small></span>
-          <span class="quick-action-arrow">→</span>
+          <span class="quick-action-arrow" aria-hidden="true">&#8594;</span>
         </button>
         <button class="quick-action" type="button" data-bind="click: function() { navigate('customers'); }">
-          <span class="quick-action-icon">+</span>
+          <span class="quick-action-icon" aria-hidden="true">+</span>
           <span><strong>Add a customer</strong><small>Grow your customer directory</small></span>
-          <span class="quick-action-arrow">→</span>
+          <span class="quick-action-arrow" aria-hidden="true">&#8594;</span>
         </button>
+        <!-- /ko -->
       </article>
     </div>
+
+    <!-- ko if: isCustomer -->
+    <article class="surface-card customer-cards-card">
+      <div class="surface-card-header">
+        <div>
+          <p class="eyebrow">Credit cards</p>
+          <h2>My credit cards</h2>
+        </div>
+        <span class="usage-value"><span data-bind="text: cardCount"></span> card<span data-bind="text: cardCount() === 1 ? '' : 's'"></span></span>
+      </div>
+      <div class="customer-card-grid" data-bind="foreach: cards">
+        <article class="credit-card-tile customer-credit-card-tile" data-bind="css: $parent.cardTileClass($data)">
+          <div class="credit-card-topline">
+            <span data-bind="text: cardType + ' CARD'"></span>
+            <span class="status-badge" data-bind="css: cardStatus === 'ACTIVE' ? 'status-active' : 'status-blocked', text: cardStatus"></span>
+          </div>
+          <div class="credit-card-number" data-bind="text: $parent.maskCardNumber(cardNumber)"></div>
+          <div class="credit-card-name" data-bind="text: $parent.currentCustomerName"></div>
+          <div class="customer-card-details">
+            <span><small>Credit limit</small><strong data-bind="text: $parent.formatCurrency(creditLimit)"></strong></span>
+            <span><small>Available</small><strong data-bind="text: $parent.formatCurrency(availableCredit)"></strong></span>
+            <span><small>Outstanding</small><strong data-bind="text: $parent.formatCurrency(outstandingAmount)"></strong></span>
+            <span><small>Expires</small><strong data-bind="text: $parent.formatDate(expiryDate)"></strong></span>
+          </div>
+          <div class="card-usage">
+            <div><span>Utilization</span><strong><span data-bind="text: $parent.cardUtilization($data)"></span>%</strong></div>
+            <div class="mini-track"><i data-bind="style: { width: $parent.cardUtilization($data) + '%' }"></i></div>
+          </div>
+        </article>
+      </div>
+      <div class="empty-state compact-empty" data-bind="visible: cards().length === 0">
+        <strong>No cards linked yet</strong>
+        <span>Your issued credit cards will appear here when Credit Operations links them to your customer account.</span>
+      </div>
+    </article>
+    <!-- /ko -->
 
     <article class="surface-card activity-card">
       <div class="surface-card-header">
         <div>
           <p class="eyebrow">Latest activity</p>
-          <h2>Recent transactions</h2>
+          <h2 data-bind="text: isCustomer() ? 'Your recent transactions' : 'Recent transactions'"></h2>
         </div>
-        <button class="link-button" type="button" data-bind="click: function() { navigate('transactions'); }">View all activity</button>
+        <button class="link-button" type="button" data-bind="click: function() { navigate('transactions'); }, text: isCustomer() ? 'View my activity' : 'View all activity'"></button>
       </div>
       <div class="activity-list" data-bind="foreach: recentTransactions">
         <div class="activity-row">
           <div class="activity-symbol" data-bind="css: $parent.transactionClass($data), text: transactionType === 'PAYMENT' ? '↓' : '↑'"></div>
           <div class="activity-copy">
             <strong data-bind="text: $parent.transactionLabel($data)"></strong>
-            <span><span data-bind="text: $parent.maskCardNumber(cardNumber)"></span> · <span data-bind="text: $parent.formatDateTime(transactionDateTime)"></span></span>
+            <span><span data-bind="text: $parent.maskCardNumber(cardNumber)"></span> &middot; <span data-bind="text: $parent.formatDateTime(transactionDateTime)"></span></span>
           </div>
           <div class="activity-amount" data-bind="css: $parent.transactionClass($data), text: $parent.formatCurrency(amount)"></div>
         </div>
       </div>
       <div class="empty-state compact-empty" data-bind="visible: recentTransactions().length === 0">
         <strong>No activity yet</strong>
-        <span>Post a purchase or payment to start building the ledger.</span>
+        <span data-bind="text: isCustomer() ? 'Your account activity will appear here once recorded.' : 'Post a purchase or payment to start building the ledger.'"></span>
       </div>
     </article>
 
     <div class="overview-strip">
+      <!-- ko if: isCustomer -->
+      <span><strong data-bind="text: cardCount"></strong> card<span data-bind="text: cardCount() === 1 ? '' : 's'"></span> on your account</span>
+      <span><strong data-bind="text: transactionCount"></strong> recorded transactions</span>
+      <!-- /ko -->
+      <!-- ko ifnot: isCustomer -->
       <span><strong data-bind="text: customerCount"></strong> customers</span>
       <span><strong data-bind="text: merchantCount"></strong> merchant partners</span>
-      <span class="connection-pill"
-            data-bind="css: { 'connection-pill-down': databaseStatus().status !== 'UP' }">
+      <span class="connection-pill" data-bind="css: { 'connection-pill-down': databaseStatus().status !== 'UP' }">
         <i></i><span data-bind="text: databaseLabel"></span>
       </span>
+      <!-- /ko -->
     </div>
   </div>
 </section>

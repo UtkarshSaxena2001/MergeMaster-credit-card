@@ -29,7 +29,7 @@ Transactions pages. The client uses the Spring Boot APIs rather than mock data.
 
    ```powershell
    npm.cmd install
-   ojet.cmd serve --server-port 8000 --server-only
+   npx.cmd ojet serve web --server-port 8000 --server-only
    ```
 
 3. Open `http://localhost:8000`. The development API target is
@@ -38,6 +38,32 @@ Transactions pages. The client uses the Spring Boot APIs rather than mock data.
 
 To use another API host, set `localStorage.mergemaster.apiBaseUrl` in the
 browser console and refresh the page.
+
+## Sign in
+
+- **Administrator:** username `admin`, password `admin`. This retains the full
+  operations portal.
+- **Customer:** enter the customer record's exact name as the username. Existing
+  customers start with their customer name as the password, and admins can assign
+  a different customer password from the Customers page. Customer access is
+  limited to that customer's dashboard and transaction history; it is read-only
+  and includes MergeGuide assistance.
+
+The login and role filtering are implemented in the browser for this local
+demo. Deploying this outside local development requires server-side
+authentication and authorization before customer data should be considered
+protected.
+
+## MergeGuide assistant
+
+- **Customer Assistant** can explain card status, purchases and payments, and
+  permitted account data such as masked card details, available credit,
+  outstanding balance, expiry date, and recent transactions.
+- **Admin Assistant** can explain customer, card, merchant, and transaction
+  workflows and calculate aggregate daily purchase/payment totals and a top
+  purchase merchant from the current portal data.
+- Chat is guidance and read-only information only. It never creates a
+  purchase, payment, card change, or account change.
 
 ## Included safeguards
 

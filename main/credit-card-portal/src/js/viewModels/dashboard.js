@@ -1,7 +1,8 @@
-define(["knockout", "../accUtils", "../api"], function (ko, AccUtils, apiModule) {
+define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUtils, apiModule, appStateModule) {
   "use strict";
 
-  const { api, asArray, formatCurrency, formatDateTime, maskCardNumber } = apiModule;
+  const { api, asArray, formatCurrency, formatDate, formatDateTime, maskCardNumber } = apiModule;
+  const appState = appStateModule.appState;
 
   class DashboardViewModel {
     constructor() {
@@ -16,7 +17,16 @@ define(["knockout", "../accUtils", "../api"], function (ko, AccUtils, apiModule)
       });
       this.isLoading = ko.observable(true);
       this.error = ko.observable("");
-      this.customerCount = ko.pureComputed(() => asArray(this.customers()).length);
+      this.isCustomer = appState.isCustomer;
+      this.currentCustomerName = appState.userName;
+      this.dashboardEyebrow = ko.pureComputed(() => this.isCustomer() ? "My credit account" : "Credit operations workspace");
+      this.dashboardTitle = ko.pureComputed(() => this.isCustomer() ? "My card overview" : "Portfolio overview");
+      this.dashboardSubtitle = ko.pureComputed(() => this.isCustomer()
+        ? "Review your available credit, balances, and recent account activity."
+        : "See customers, cards and account activity in one clear view.");
+      this.customerCount = ko.pureComputed(() => this.isCustomer()
+        ? (asArray(this.cards()).length ? 1 : 0)
+        : asArray(this.customers()).length);
       this.cardCount = ko.pureComputed(() => asArray(this.cards()).length);
       this.merchantCount = ko.pureComputed(() => asArray(this.merchants()).length);
       this.transactionCount = ko.pureComputed(() => asArray(this.transactions()).length);
@@ -45,8 +55,23 @@ define(["knockout", "../accUtils", "../api"], function (ko, AccUtils, apiModule)
           : "Database connection unavailable";
       });
       this.formatCurrency = formatCurrency;
+      this.formatDate = formatDate;
       this.formatDateTime = formatDateTime;
       this.maskCardNumber = maskCardNumber;
+      this.cardTileClass = (card) => {
+        const cardType = String(card.cardType || "").trim().toUpperCase();
+        const cardStatus = String(card.cardStatus || "").trim().toUpperCase();
+        return {
+          "credit-card-tile-blocked": cardStatus === "BLOCKED",
+          "credit-card-tile-silver": cardType === "SILVER",
+          "credit-card-tile-gold": cardType === "GOLD",
+          "credit-card-tile-platinum": cardType === "PLATINUM"
+        };
+      };
+      this.cardUtilization = (card) => {
+        const limit = Number(card.creditLimit);
+        return limit ? Math.min(100, Math.round((Number(card.outstandingAmount) / limit) * 100)) : 0;
+      };
       this.refresh = async () => {
         this.isLoading(true);
         this.error("");
@@ -62,10 +87,16 @@ define(["knockout", "../accUtils", "../api"], function (ko, AccUtils, apiModule)
               service: ""
             }))
           ]);
-          this.customers(asArray(customers));
-          this.cards(asArray(cards));
-          this.merchants(asArray(merchants));
-          this.transactions(asArray(transactions));
+          const allCustomers = asArray(customers);
+          const allCards = asArray(cards);
+          const allTransactions = asArray(transactions);
+          const isCustomer = this.isCustomer();
+          this.customers(isCustomer
+            ? allCustomers.filter((customer) => Number(customer.customerId) === Number(appState.customerId()))
+            : allCustomers);
+          this.cards(appState.scopeCards(allCards));
+          this.merchants(isCustomer ? [] : asArray(merchants));
+          this.transactions(appState.scopeTransactions(allTransactions, allCards));
           this.databaseStatus(databaseStatus);
         } catch (error) {
           this.error(error instanceof Error ? error.message : "Unable to load dashboard data.");
@@ -79,8 +110,8 @@ define(["knockout", "../accUtils", "../api"], function (ko, AccUtils, apiModule)
     }
 
     connected() {
-      AccUtils.announce("Dashboard page loaded.");
-      document.title = "MergeMaster | Dashboard";
+      AccUtils.announce(this.isCustomer() ? "My dashboard loaded." : "Dashboard page loaded.");
+      document.title = this.isCustomer() ? "MergeMaster | My dashboard" : "MergeMaster | Dashboard";
       void this.refresh();
     }
   }

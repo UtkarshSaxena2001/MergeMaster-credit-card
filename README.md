@@ -37,6 +37,15 @@ class.
 The integrated application starts on `http://localhost:8080` and validates the
 existing Oracle FREE schema. H2 is used only by automated tests.
 
+If your Oracle `CUSTOMER` table already exists, add the customer login password
+column once before starting the backend:
+
+```sql
+ALTER TABLE customer ADD password VARCHAR2(100);
+UPDATE customer SET password = customer_name WHERE password IS NULL;
+ALTER TABLE customer MODIFY password NOT NULL;
+```
+
 ## Oracle JET portal
 
 The full Oracle JET operations portal is in [`main/credit-card-portal`](main/credit-card-portal).

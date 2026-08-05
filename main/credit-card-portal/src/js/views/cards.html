@@ -75,7 +75,7 @@
     </div>
     <div class="loading-panel" data-bind="visible: isLoading"><span class="loading-spinner"></span> Loading cards…</div>
     <div class="card-grid" data-bind="visible: !isLoading() && !error() && filteredCards().length, foreach: filteredCards">
-      <article class="credit-card-tile" data-bind="css: { 'credit-card-tile-blocked': cardStatus === 'BLOCKED' }">
+      <article class="credit-card-tile" data-bind="css: $parent.cardTileClass($data)">
         <div class="credit-card-topline"><span data-bind="text: cardType + ' CARD'"></span><span class="status-badge" data-bind="css: cardStatus === 'ACTIVE' ? 'status-active' : 'status-blocked', text: cardStatus"></span></div>
         <div class="credit-card-number" data-bind="text: $parent.maskCardNumber(cardNumber)"></div>
         <div class="credit-card-name" data-bind="text: $parent.customerLabel($data)"></div>

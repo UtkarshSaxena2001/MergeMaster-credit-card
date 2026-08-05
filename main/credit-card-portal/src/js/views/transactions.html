@@ -1,40 +1,49 @@
 <section class="page-shell transactions-page">
   <header class="page-heading">
     <div>
-      <p class="eyebrow">Transactions module</p>
-      <h1>Transaction workspace</h1>
-      <p class="page-subtitle">Post purchases and payments with real-time credit safeguards.</p>
+      <p class="eyebrow" data-bind="text: isCustomer() ? 'My account activity' : 'Transactions module'"></p>
+      <h1 data-bind="text: transactionPageTitle"></h1>
+      <p class="page-subtitle" data-bind="text: transactionPageSubtitle"></p>
     </div>
-    <button class="button button-secondary" type="button" data-bind="click: refresh, disable: isLoading"><span class="button-icon">↻</span> Refresh activity</button>
+    <button class="button button-secondary" type="button" data-bind="click: refresh, disable: isLoading"><span class="button-icon" aria-hidden="true">&#x21bb;</span> Refresh activity</button>
   </header>
 
-  <div class="status-panel status-panel-error" data-bind="visible: error"><strong>Couldn’t load transaction data.</strong><span data-bind="text: error"></span><button class="link-button" type="button" data-bind="click: refresh">Try again</button></div>
+  <div class="status-panel status-panel-error" data-bind="visible: error"><strong>Could not load transaction data.</strong><span data-bind="text: error"></span><button class="link-button" type="button" data-bind="click: refresh">Try again</button></div>
 
+  <!-- ko ifnot: isCustomer -->
   <article class="surface-card transaction-form-card">
     <div class="surface-card-header">
       <div><p class="eyebrow">New ledger entry</p><h2 data-bind="text: formTypeLabel"></h2></div>
       <div class="segmented-control" role="group" aria-label="Transaction type"><button type="button" data-bind="click: function() { setTransactionType('PURCHASE'); }, css: { active: transactionType() === 'PURCHASE' }">Purchase</button><button type="button" data-bind="click: function() { setTransactionType('PAYMENT'); }, css: { active: transactionType() === 'PAYMENT' }">Payment</button></div>
     </div>
-    <form class="form-grid transaction-form" data-bind="submit: submitForm" novalidate>
+    <form class="form-grid transaction-form" data-bind="submit: submitForm" novalidate="novalidate">
       <label class="field field-span-2"><span>Card</span><select data-bind="options: cardOptions, optionsText: 'label', optionsValue: 'value', value: cardNumber, optionsCaption: 'Select a card'"></select><small class="field-help" data-bind="text: selectedCardLabel"></small></label>
       <label class="field" data-bind="visible: transactionType() === 'PURCHASE'"><span>Merchant</span><select data-bind="options: merchantOptions, optionsText: 'label', optionsValue: 'value', value: merchantId, optionsCaption: 'Select a merchant'"></select></label>
       <label class="field" data-bind="css: { 'field-span-2': transactionType() === 'PAYMENT' }"><span>Amount</span><input type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" data-bind="value: amount, valueUpdate: 'input'"></label>
       <div class="form-error field-span-2" data-bind="visible: formError, text: formError"></div>
-      <div class="form-actions field-span-2"><button class="button button-primary" type="submit" data-bind="disable: formBusy || !cards().length"><span data-bind="text: formBusy() ? 'Posting…' : formTypeLabel()"></span></button></div>
+      <div class="form-actions field-span-2"><button class="button button-primary" type="submit" data-bind="disable: formBusy || !cards().length"><span data-bind="text: formBusy() ? 'Posting...' : formTypeLabel()"></span></button></div>
     </form>
   </article>
+  <!-- /ko -->
+
+  <!-- ko if: isCustomer -->
+  <article class="customer-view-notice" aria-label="Customer access information">
+    <span class="customer-view-notice-icon" aria-hidden="true">&#128274;</span>
+    <span><strong>Your transaction view is read-only.</strong><small>For your privacy, you can review activity on your own cards here. Contact Credit Operations for payments, purchases, or account changes.</small></span>
+  </article>
+  <!-- /ko -->
 
   <article class="surface-card data-card activity-table-card">
-    <div class="surface-card-header"><div><p class="eyebrow">Audit trail</p><h2>Transaction history</h2></div><button class="link-button" type="button" data-bind="click: clearFilters">Clear filters</button></div>
+    <div class="surface-card-header"><div><p class="eyebrow">Audit trail</p><h2 data-bind="text: isCustomer() ? 'My transaction history' : 'Transaction history'"></h2></div><button class="link-button" type="button" data-bind="click: clearFilters">Clear filters</button></div>
     <div class="filter-grid">
-      <div class="search-field"><span aria-hidden="true">⌕</span><input type="search" aria-label="Search transactions" placeholder="Search transaction, card, merchant or amount" data-bind="value: searchText, valueUpdate: 'input'"></div>
+      <div class="search-field"><span aria-hidden="true">&#8981;</span><input type="search" aria-label="Search transactions" placeholder="Search transaction, card, merchant or amount" data-bind="value: searchText, valueUpdate: 'input'"></div>
       <select class="filter-select" aria-label="Filter card" data-bind="options: cardOptions, optionsText: 'label', optionsValue: 'value', value: filterCard, optionsCaption: 'All cards'"></select>
       <select class="filter-select" aria-label="Filter merchant" data-bind="options: merchantOptions, optionsText: 'label', optionsValue: 'value', value: filterMerchant, optionsCaption: 'All merchants'"></select>
       <select class="filter-select" aria-label="Filter transaction type" data-bind="options: ['ALL', 'PURCHASE', 'PAYMENT'], value: filterType"></select>
       <label class="date-filter"><span>From</span><input type="date" data-bind="value: fromDate"></label>
       <label class="date-filter"><span>To</span><input type="date" data-bind="value: toDate"></label>
     </div>
-    <div class="loading-panel" data-bind="visible: isLoading"><span class="loading-spinner"></span> Loading transaction history…</div>
+    <div class="loading-panel" data-bind="visible: isLoading"><span class="loading-spinner"></span> Loading transaction history...</div>
     <div class="table-wrap" data-bind="visible: !isLoading() && !error() && filteredTransactions().length">
       <table class="data-table transaction-table">
         <thead><tr><th>Transaction</th><th>Card</th><th>Merchant</th><th>When</th><th>Amount</th><th>Status</th></tr></thead>
@@ -50,6 +59,6 @@
         </tbody>
       </table>
     </div>
-    <div class="empty-state" data-bind="visible: !isLoading() && !error() && filteredTransactions().length === 0"><strong data-bind="text: transactions().length ? 'No transactions match these filters' : 'No transactions yet'"></strong><span data-bind="text: transactions().length ? 'Clear a filter or search differently.' : 'Post a purchase or payment to start the audit trail.'"></span></div>
+    <div class="empty-state" data-bind="visible: !isLoading() && !error() && filteredTransactions().length === 0"><strong data-bind="text: transactions().length ? 'No transactions match these filters' : 'No transactions yet'"></strong><span data-bind="text: transactions().length ? 'Clear a filter or search differently.' : (isCustomer() ? 'There is no recorded activity for your cards yet.' : 'Post a purchase or payment to start the audit trail.')"></span></div>
   </article>
 </section>

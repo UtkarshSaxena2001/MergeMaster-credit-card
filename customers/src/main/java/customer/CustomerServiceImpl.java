@@ -114,16 +114,29 @@ public class CustomerServiceImpl implements CustomerService {
 
     private void updateEntity(Customer customer, CustomerRequest request,
                               String email, String mobileNumber, String panNumber) {
-        customer.setCustomerName(request.getCustomerName().trim().replaceAll("\\s+", " "));
+        String customerName = request.getCustomerName().trim().replaceAll("\\s+", " ");
+        customer.setCustomerName(customerName);
+        customer.setPassword(resolvePassword(request.getPassword(), customerName, customer.getPassword()));
         customer.setEmail(email);
         customer.setMobileNumber(mobileNumber);
         customer.setPanNumber(panNumber);
+    }
+
+    private String resolvePassword(String requestedPassword, String customerName, String currentPassword) {
+        if (requestedPassword != null && !requestedPassword.trim().isEmpty()) {
+            return requestedPassword.trim();
+        }
+        if (currentPassword != null && !currentPassword.trim().isEmpty()) {
+            return currentPassword.trim();
+        }
+        return customerName;
     }
 
     private CustomerResponse toResponse(Customer customer) {
         return new CustomerResponse(
                 customer.getCustomerId(),
                 customer.getCustomerName(),
+                customer.getPassword(),
                 customer.getEmail(),
                 customer.getMobileNumber(),
                 customer.getPanNumber());

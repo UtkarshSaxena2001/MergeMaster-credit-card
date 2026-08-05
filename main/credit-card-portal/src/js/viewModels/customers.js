@@ -22,6 +22,7 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
       });
       this.editingId = ko.observable(null);
       this.customerName = ko.observable("");
+      this.password = ko.observable("");
       this.email = ko.observable("");
       this.mobileNumber = ko.observable("");
       this.panNumber = ko.observable("");
@@ -55,6 +56,7 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
       this.openEdit = (customer) => {
         this.editingId(customer.customerId);
         this.customerName(customer.customerName);
+        this.password(customer.password || customer.customerName || "");
         this.email(customer.email);
         this.mobileNumber(customer.mobileNumber);
         this.panNumber(customer.panNumber);
@@ -105,6 +107,7 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
     async save() {
       const input = {
         customerName: this.customerName().trim(),
+        password: this.password().trim(),
         email: this.email().trim(),
         mobileNumber: this.mobileNumber().trim(),
         panNumber: this.panNumber().trim().toUpperCase()
@@ -153,6 +156,7 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
 
     resetForm() {
       this.customerName("");
+      this.password("");
       this.email("");
       this.mobileNumber("");
       this.panNumber("");
@@ -161,6 +165,7 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
 
     validate(input) {
       if (input.customerName.length < 2) return "Enter a customer name of at least two characters.";
+      if (input.password && input.password.length > 100) return "Password cannot exceed 100 characters.";
       if (!/^\S+@\S+\.\S+$/.test(input.email)) return "Enter a valid email address.";
       if (!/^\d{10,15}$/.test(input.mobileNumber)) return "Mobile number must contain 10 to 15 digits.";
       if (!/^[A-Z]{5}\d{4}[A-Z]$/.test(input.panNumber)) return "PAN must follow the format ABCDE1234F.";

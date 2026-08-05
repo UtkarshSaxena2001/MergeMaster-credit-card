@@ -32,6 +32,7 @@ public class DataInitializer implements CommandLineRunner {
 
         Customer customer1 = new Customer();
         customer1.setCustomerName("John Doe");
+        customer1.setPassword("John Doe");
         customer1.setEmail("john.doe@example.com");
         customer1.setMobileNumber("9876543210");
         customer1.setPanNumber("ABCDE1234F");
@@ -39,6 +40,7 @@ public class DataInitializer implements CommandLineRunner {
 
         Customer customer2 = new Customer();
         customer2.setCustomerName("Jane Smith");
+        customer2.setPassword("Jane Smith");
         customer2.setEmail("jane.smith@example.com");
         customer2.setMobileNumber("8765432109");
         customer2.setPanNumber("XYZAB5678G");
@@ -46,6 +48,7 @@ public class DataInitializer implements CommandLineRunner {
 
         Customer customer3 = new Customer();
         customer3.setCustomerName("Alice Johnson");
+        customer3.setPassword("Alice Johnson");
         customer3.setEmail("alice.johnson@example.com");
         customer3.setMobileNumber("7654321098");
         customer3.setPanNumber("PQRST9012H");
