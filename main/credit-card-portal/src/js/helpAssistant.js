@@ -180,14 +180,14 @@ define([], function () {
     },
     {
       id: "delete-customer",
-      title: "Why a customer cannot be deleted",
-      body: "A customer with an issued card cannot be deleted. Remove or reassign the linked card first, then return to Customers and delete the record.",
+      title: "Delete a customer",
+      body: "Admins can delete a customer. If cards or transactions are linked, Credit Vault removes those linked records first so Oracle foreign-key rules do not block the delete.",
       steps: [
-        "Check the customer’s linked-card label in the customer directory.",
-        "Open Cards and manage the linked card if necessary.",
-        "Return to Customers and select Delete once no card is linked."
+        "Open Customers and find the record.",
+        "Select Delete beside that customer.",
+        "Confirm the warning if linked cards and transactions will also be removed."
       ],
-      action: { label: "Open Cards", route: "cards" },
+      action: { label: "Open Customers", route: "customers" },
       routes: ["customers", "cards"],
       keywords: ["delete", "remove", "cannot", "cant", "unable", "customer", "linked", "card"],
       phrases: ["delete customer", "cannot delete customer", "cant delete customer", "remove customer"],
@@ -288,12 +288,12 @@ define([], function () {
     },
     {
       id: "delete-merchant",
-      title: "Why a merchant cannot be deleted",
-      body: "A merchant with transaction history cannot be deleted, so the audit trail stays intact. Merchants with no activity can be deleted from the merchant directory.",
+      title: "Delete a merchant",
+      body: "Admins can delete a merchant. If purchase transactions are linked to that merchant, Credit Vault removes those transactions first, then deletes the merchant.",
       steps: [
-        "Check the Activity column in Merchants.",
-        "Keep merchants that are linked to recorded transactions.",
-        "Use Delete only for merchants with no activity."
+        "Open Merchants and find the partner.",
+        "Select Delete.",
+        "Confirm the warning if linked transactions will also be removed."
       ],
       action: { label: "Open Merchants", route: "merchants" },
       routes: ["merchants", "transactions"],
@@ -428,12 +428,12 @@ define([], function () {
     },
     {
       id: "delete-card",
-      title: "Why a card cannot be deleted",
-      body: "Cards with recorded transactions are retained to protect the audit trail. A card without transaction history can be deleted from its card tile.",
+      title: "Delete a card",
+      body: "Admins can delete a card. If transactions are linked to that card, Credit Vault removes those transactions first, then deletes the card.",
       steps: [
         "Open Cards and find the card tile.",
-        "Use Delete only when the card has no transaction history.",
-        "Keep cards with recorded activity so the history remains intact."
+        "Select Delete.",
+        "Confirm the warning if linked transactions will also be removed."
       ],
       action: { label: "Open Cards", route: "cards" },
       routes: ["cards", "transactions"],

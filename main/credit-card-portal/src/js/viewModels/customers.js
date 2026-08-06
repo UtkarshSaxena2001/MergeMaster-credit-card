@@ -74,11 +74,11 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
         return false;
       };
       this.deleteCustomer = async (customer) => {
-        if (this.isLinkedToCard(customer)) {
-          appState.notify("This customer has an issued card. Remove or reassign the card before deleting them.", "error");
-          return;
-        }
-        if (!window.confirm(`Delete ${customer.customerName} from the customer directory?`)) return;
+        const linkedCards = this.linkedCards(customer).length;
+        const message = linkedCards
+          ? `Delete ${customer.customerName}, ${linkedCards} linked card(s), and their transactions?`
+          : `Delete ${customer.customerName} from the customer directory?`;
+        if (!window.confirm(message)) return;
         try {
           await api.deleteCustomer(customer.customerId);
           appState.notify("Customer deleted.", "success");

@@ -25,6 +25,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     List<Transaction> findByStatusOrderByTransactionDateTimeDesc(TransactionStatus status);
 
+    void deleteByCardNumber(String cardNumber);
+
+    void deleteByMerchantId(Long merchantId);
+
     List<Transaction> findByTransactionDateTimeBetweenOrderByTransactionDateTimeDesc(
             LocalDateTime startDateTime,
             LocalDateTime endDateTime

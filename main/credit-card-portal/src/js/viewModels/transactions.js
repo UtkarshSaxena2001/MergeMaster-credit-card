@@ -112,6 +112,17 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
       };
       this.transactionClass = (transaction) => transaction.transactionType === "PAYMENT" ? "transaction-payment" : "transaction-purchase";
       this.transactionLabel = (transaction) => transaction.transactionType === "PAYMENT" ? "Payment" : "Purchase";
+      this.deleteTransaction = async (transaction) => {
+        if (this.isCustomer()) return;
+        if (!window.confirm(`Delete transaction TXN-${transaction.transactionId}?`)) return;
+        try {
+          await api.deleteTransaction(transaction.transactionId);
+          appState.notify("Transaction deleted.", "success");
+          await this.refresh();
+        } catch (error) {
+          appState.notify(error instanceof Error ? error.message : "Transaction could not be deleted.", "error");
+        }
+      };
     }
 
     connected() {

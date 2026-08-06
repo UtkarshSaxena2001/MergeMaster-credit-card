@@ -46,7 +46,7 @@
     <div class="loading-panel" data-bind="visible: isLoading"><span class="loading-spinner"></span> Loading transaction history...</div>
     <div class="table-wrap" data-bind="visible: !isLoading() && !error() && filteredTransactions().length">
       <table class="data-table transaction-table">
-        <thead><tr><th>Transaction</th><th>Card</th><th>Merchant</th><th>When</th><th>Amount</th><th>Status</th></tr></thead>
+        <thead><tr><th>Transaction</th><th>Card</th><th>Merchant</th><th>When</th><th>Amount</th><th>Status</th><th data-bind="visible: !isCustomer()"><span class="sr-only">Actions</span></th></tr></thead>
         <tbody data-bind="foreach: filteredTransactions">
           <tr>
             <td><span class="transaction-type-chip" data-bind="css: $parent.transactionClass($data)"><i data-bind="text: transactionType === 'PAYMENT' ? '↓' : '↑'"></i><span data-bind="text: $parent.transactionLabel($data)"></span></span><small data-bind="text: 'TXN-' + transactionId"></small></td>
@@ -55,6 +55,7 @@
             <td data-bind="text: $parent.formatDateTime(transactionDateTime)"></td>
             <td><strong data-bind="css: $parent.transactionClass($data), text: $parent.formatCurrency(amount)"></strong></td>
             <td><span class="status-badge status-active" data-bind="text: status"></span></td>
+            <td class="row-actions" data-bind="visible: !$parent.isCustomer()"><button class="text-action text-action-danger" type="button" data-bind="click: $parent.deleteTransaction">Delete</button></td>
           </tr>
         </tbody>
       </table>

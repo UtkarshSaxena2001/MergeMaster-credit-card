@@ -42,7 +42,7 @@
             <td><span class="category-pill" data-bind="text: category"></span></td>
             <td data-bind="text: location || '—'"></td>
             <td><span class="linked-label" data-bind="text: $parent.transactionCount($data) ? $parent.transactionCount($data) + ' transaction(s)' : 'No activity'"></span></td>
-            <td class="row-actions"><button class="text-action" type="button" data-bind="click: $parent.openEdit">Edit</button><button class="text-action text-action-danger" type="button" data-bind="click: $parent.deleteMerchant, disable: $parent.transactionCount($data) > 0">Delete</button></td>
+            <td class="row-actions"><button class="text-action" type="button" data-bind="click: $parent.openEdit">Edit</button><button class="text-action text-action-danger" type="button" data-bind="click: $parent.deleteMerchant">Delete</button></td>
           </tr>
         </tbody>
       </table>

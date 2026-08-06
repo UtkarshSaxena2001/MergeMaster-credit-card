@@ -14,6 +14,7 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
       this.formVisible = ko.observable(false);
       this.formBusy = ko.observable(false);
       this.formError = ko.observable("");
+      this.selectedCard = ko.observable(null);
       this.editingCardNumber = ko.observable(null);
       this.cardNumber = ko.observable("");
       this.customerId = ko.observable("");
@@ -73,6 +74,19 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
           "credit-card-tile-gold": cardType === "GOLD",
           "credit-card-tile-platinum": cardType === "PLATINUM"
         };
+      };
+      this.selectCard = (card) => {
+        this.selectedCard(card);
+      };
+      this.selectCardFromKeyboard = (card, event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          this.selectCard(card);
+        }
+        return true;
+      };
+      this.closeCardDetails = () => {
+        this.selectedCard(null);
       };
       this.refresh = async () => {
         this.isLoading(true);
@@ -138,6 +152,17 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
         const limit = Number(card.creditLimit);
         return limit ? Math.min(100, Math.round((Number(card.outstandingAmount) / limit) * 100)) : 0;
       };
+      this.detailRows = (card) => card ? [
+        { label: "Cardholder", value: this.customerLabel(card) },
+        { label: "Card number", value: this.maskCardNumber(card.cardNumber) },
+        { label: "Card tier", value: card.cardType },
+        { label: "Status", value: card.cardStatus },
+        { label: "Credit limit", value: this.formatCurrency(card.creditLimit) },
+        { label: "Available credit", value: this.formatCurrency(card.availableCredit) },
+        { label: "Outstanding amount", value: this.formatCurrency(card.outstandingAmount) },
+        { label: "Expiry date", value: this.formatDate(card.expiryDate) },
+        { label: "Utilization", value: `${this.cardUtilization(card)}%` }
+      ] : [];
     }
 
     connected() {
@@ -177,6 +202,7 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
           await api.createCard(input);
           appState.notify("New card issued successfully.", "success");
         }
+        this.selectedCard(null);
         this.closeForm();
         await this.refresh();
       } catch (error) {

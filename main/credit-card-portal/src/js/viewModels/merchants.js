@@ -74,11 +74,11 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
         return false;
       };
       this.deleteMerchant = async (merchant) => {
-        if (this.transactionCount(merchant) > 0) {
-          appState.notify("This merchant is referenced by transaction history and is kept to preserve the audit trail.", "error");
-          return;
-        }
-        if (!window.confirm(`Delete ${merchant.merchantName} from the merchant directory?`)) return;
+        const transactions = this.transactionCount(merchant);
+        const message = transactions
+          ? `Delete ${merchant.merchantName} and ${transactions} linked transaction(s)?`
+          : `Delete ${merchant.merchantName} from the merchant directory?`;
+        if (!window.confirm(message)) return;
         try {
           await api.deleteMerchant(merchant.merchantId);
           appState.notify("Merchant deleted.", "success");

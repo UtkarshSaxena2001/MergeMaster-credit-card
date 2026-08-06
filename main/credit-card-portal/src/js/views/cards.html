@@ -75,13 +75,26 @@
     </div>
     <div class="loading-panel" data-bind="visible: isLoading"><span class="loading-spinner"></span> Loading cards…</div>
     <div class="card-grid" data-bind="visible: !isLoading() && !error() && filteredCards().length, foreach: filteredCards">
-      <article class="credit-card-tile" data-bind="css: $parent.cardTileClass($data)">
+      <article class="credit-card-tile selectable-card-tile" tabindex="0" role="button" aria-label="View card details" data-bind="css: $parent.cardTileClass($data), click: $parent.selectCard, event: { keydown: $parent.selectCardFromKeyboard }">
         <div class="credit-card-topline"><span data-bind="text: cardType + ' CARD'"></span><span class="status-badge" data-bind="css: cardStatus === 'ACTIVE' ? 'status-active' : 'status-blocked', text: cardStatus"></span></div>
         <div class="credit-card-number" data-bind="text: $parent.maskCardNumber(cardNumber)"></div>
         <div class="credit-card-name" data-bind="text: $parent.customerLabel($data)"></div>
         <div class="credit-card-meta"><span>Expires <strong data-bind="text: $parent.formatDate(expiryDate)"></strong></span><span>Available <strong data-bind="text: $parent.formatCurrency(availableCredit)"></strong></span></div>
         <div class="card-usage"><div><span>Utilization</span><strong><span data-bind="text: $parent.cardUtilization($data)"></span>%</strong></div><div class="mini-track"><i data-bind="style: { width: $parent.cardUtilization($data) + '%' }"></i></div></div>
-        <div class="card-tile-actions"><button class="text-action" type="button" data-bind="click: $parent.openEdit">Manage</button><button class="text-action text-action-danger" type="button" data-bind="click: $parent.deleteCard">Delete</button></div>
+        <div class="card-tile-actions"><button class="text-action" type="button" data-bind="click: $parent.openEdit, clickBubble: false">Manage</button><button class="text-action text-action-danger" type="button" data-bind="click: $parent.deleteCard, clickBubble: false">Delete</button></div>
+      </article>
+    </div>
+    <div data-bind="if: selectedCard">
+      <article class="credit-card-tile card-detail-panel" data-bind="css: cardTileClass(selectedCard())">
+        <div class="credit-card-topline">
+          <span data-bind="text: selectedCard().cardType + ' CARD DETAILS'"></span>
+          <button class="card-detail-close" type="button" aria-label="Close card details" data-bind="click: closeCardDetails">×</button>
+        </div>
+        <div class="credit-card-number" data-bind="text: maskCardNumber(selectedCard().cardNumber)"></div>
+        <div class="credit-card-name" data-bind="text: customerLabel(selectedCard())"></div>
+        <div class="card-detail-grid" data-bind="foreach: detailRows(selectedCard())">
+          <span><small data-bind="text: label"></small><strong data-bind="text: value"></strong></span>
+        </div>
       </article>
     </div>
     <div class="empty-state" data-bind="visible: !isLoading() && !error() && filteredCards().length === 0">

@@ -66,7 +66,7 @@ define([], function () {
     getCustomers: () => request("/api/customers"),
     createCustomer: (input) => request("/api/customers", { method: "POST", ...jsonBody(input) }),
     updateCustomer: (id, input) => request(`/api/customers/${id}`, { method: "PUT", ...jsonBody(input) }),
-    deleteCustomer: (id) => request(`/api/customers/${id}`, { method: "DELETE" }),
+    deleteCustomer: (id) => request(`/api/admin/delete/customers/${id}`, { method: "DELETE" }),
     requestCustomerOtp: (input) => request("/api/auth/customer/otp/request", { method: "POST", ...jsonBody(input) }),
     setupCustomerLogin: (input) => request("/api/auth/customer/otp/setup", { method: "POST", ...jsonBody(input) }),
     loginCustomer: (input) => request("/api/auth/customer/login", { method: "POST", ...jsonBody(input) }),
@@ -77,14 +77,15 @@ define([], function () {
       method: "PUT",
       ...jsonBody(input)
     }),
-    deleteCard: (cardNumber) => request(`/api/creditcards/${encodeURIComponent(cardNumber)}`, { method: "DELETE" }),
+    deleteCard: (cardNumber) => request(`/api/admin/delete/creditcards/${encodeURIComponent(cardNumber)}`, { method: "DELETE" }),
 
     getMerchants: () => request("/api/merchants"),
     createMerchant: (input) => request("/api/merchants", { method: "POST", ...jsonBody(input) }),
     updateMerchant: (id, input) => request(`/api/merchants/${id}`, { method: "PUT", ...jsonBody(input) }),
-    deleteMerchant: (id) => request(`/api/merchants/${id}`, { method: "DELETE" }),
+    deleteMerchant: (id) => request(`/api/admin/delete/merchants/${id}`, { method: "DELETE" }),
 
     getTransactions: () => request("/api/transactions"),
+    deleteTransaction: (id) => request(`/api/admin/delete/transactions/${id}`, { method: "DELETE" }),
     purchase: (input) => request("/api/transactions/purchase", { method: "POST", ...jsonBody(input) }),
     payment: (input) => request("/api/transactions/payment", { method: "POST", ...jsonBody(input) })
   };
