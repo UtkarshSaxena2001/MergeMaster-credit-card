@@ -56,7 +56,7 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
       this.openEdit = (customer) => {
         this.editingId(customer.customerId);
         this.customerName(customer.customerName);
-        this.password(customer.password || customer.customerName || "");
+        this.password(customer.password || "");
         this.email(customer.email);
         this.mobileNumber(customer.mobileNumber);
         this.panNumber(customer.panNumber);
@@ -100,21 +100,28 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
 
     connected() {
       AccUtils.announce("Customers page loaded.");
-      document.title = "MergeMaster | Customers";
+      document.title = "Credit Vault | Customers";
       void this.refresh();
     }
 
     async save() {
       const input = {
         customerName: this.customerName().trim(),
-        password: this.password().trim(),
         email: this.email().trim(),
         mobileNumber: this.mobileNumber().trim(),
         panNumber: this.panNumber().trim().toUpperCase()
       };
+      if (this.isEditing()) {
+        input.password = this.password().trim();
+      }
       const validationError = this.validate(input);
       if (validationError) {
         this.formError(validationError);
+        return;
+      }
+      const duplicateError = this.findDuplicate(input, this.editingId());
+      if (duplicateError) {
+        this.formError(duplicateError);
         return;
       }
       this.formBusy(true);
@@ -169,6 +176,22 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
       if (!/^\S+@\S+\.\S+$/.test(input.email)) return "Enter a valid email address.";
       if (!/^\d{10,15}$/.test(input.mobileNumber)) return "Mobile number must contain 10 to 15 digits.";
       if (!/^[A-Z]{5}\d{4}[A-Z]$/.test(input.panNumber)) return "PAN must follow the format ABCDE1234F.";
+      return "";
+    }
+
+    findDuplicate(input, editingId) {
+      const normalizedEmail = input.email.toLowerCase();
+      const normalizedPan = input.panNumber.toUpperCase();
+      const existing = this.customers().filter((customer) => Number(customer.customerId) !== Number(editingId));
+      if (existing.some((customer) => String(customer.email || "").trim().toLowerCase() === normalizedEmail)) {
+        return "Email is already registered";
+      }
+      if (existing.some((customer) => String(customer.mobileNumber || "").trim() === input.mobileNumber)) {
+        return "Mobile number is already registered";
+      }
+      if (existing.some((customer) => String(customer.panNumber || "").trim().toUpperCase() === normalizedPan)) {
+        return "PAN number is already registered";
+      }
       return "";
     }
   }

@@ -116,7 +116,7 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
 
     connected() {
       AccUtils.announce(this.isCustomer() ? "My transactions loaded." : "Transactions page loaded.");
-      document.title = this.isCustomer() ? "MergeMaster | My transactions" : "MergeMaster | Transactions";
+      document.title = this.isCustomer() ? "Credit Vault | My transactions" : "Credit Vault | Transactions";
       void this.refresh();
     }
 

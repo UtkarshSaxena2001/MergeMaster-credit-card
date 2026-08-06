@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-IN">
   <head>
-    <title>Megre Master Oracle Red</title>
+    <title>Credit Vault</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1">
     <meta name="theme-color" content="#c74634">
@@ -37,8 +37,8 @@
       <!-- ko if: loginIntroVisible -->
       <div class="login-intro" aria-live="polite" data-bind="css: { 'login-intro-logo-phase': loginIntroLogoVisible }">
         <video class="login-intro-video" src="media/login-intro.mp4" muted playsinline autoplay data-bind="event: { ended: revealLoginIntroLogo }"></video>
-        <div class="login-intro-brand" aria-label="Megre Master Oracle Red">
-          <span class="login-intro-logo-text"><strong>Megre Master</strong><small>Oracle Red</small></span>
+        <div class="login-intro-brand" aria-label="Credit Vault">
+          <span class="login-intro-logo-text"><strong>Credit Vault</strong><small>Oracle Red</small></span>
           <span class="login-intro-gold-line" aria-hidden="true"></span>
         </div>
       </div>
@@ -62,7 +62,7 @@
           <span class="guide-context-pulse" aria-hidden="true"></span>
           <span><strong data-bind="text: assistantContextTitle"></strong><small data-bind="text: assistantContextCaption"></small></span>
         </div>
-        <p id="mergeGuidePrivacy" class="sr-only">Ask about Megre Master. Do not enter passwords, PANs, or full card numbers.</p>
+        <p id="mergeGuidePrivacy" class="sr-only">Ask about Credit Vault. Do not enter passwords, PANs, or full card numbers.</p>
 
         <div id="guideConversation" class="guide-conversation" role="log" aria-label="MergeGuide conversation" data-bind="foreach: assistantMessages">
           <article class="guide-message" data-bind="css: 'guide-message guide-message-' + role">
@@ -109,20 +109,56 @@
       </button>
       <!-- /ko -->
 
-      <!-- ko ifnot: isAuthenticated -->
+      <!-- ko if: !isAuthenticated() && !loginReady() -->
+      <section class="index-screen" aria-labelledby="indexTitle">
+        <div class="index-shell">
+          <header class="index-nav">
+            <div class="index-brand">
+              <span class="brand-mark">CV</span>
+              <span><strong>Credit Vault</strong><small>Oracle Red credit workspace</small></span>
+            </div>
+            <button class="index-login-link" type="button" data-motion-interactive="true" data-bind="click: enterLogin">Login</button>
+          </header>
+          <main class="index-hero">
+            <section class="index-copy">
+              <p class="eyebrow">Credit intelligence with a sharper rhythm</p>
+              <h1 id="indexTitle">Let every card, customer, and transaction move in step.</h1>
+              <p>Credit Vault brings balances, card health, and transaction activity into one expressive Oracle-red command space.</p>
+              <div class="index-actions">
+                <button class="auth-submit index-primary-action" type="button" data-motion-interactive="true" data-bind="click: enterLogin"><span>Enter workspace</span><span aria-hidden="true">&#8594;</span></button>
+                <span class="index-tagline">Watch credit flow. Act with clarity.</span>
+              </div>
+            </section>
+            <section class="index-orbit" aria-label="Credit Vault overview">
+              <div class="walt-card walt-card-main">
+                <span>Credit Vault</span>
+                <strong>Oracle Red</strong>
+                <small>Portfolio pulse</small>
+              </div>
+              <div class="walt-ring" aria-hidden="true"></div>
+              <div class="walt-metric walt-metric-one"><strong>Cards</strong><span>Active status</span></div>
+              <div class="walt-metric walt-metric-two"><strong>Credit</strong><span>Available balance</span></div>
+              <div class="walt-metric walt-metric-three"><strong>Ledger</strong><span>Clean history</span></div>
+            </section>
+          </main>
+        </div>
+      </section>
+      <!-- /ko -->
+
+      <!-- ko if: !isAuthenticated() && loginReady() -->
       <section class="auth-screen" aria-labelledby="loginTitle">
         <div class="auth-aura auth-aura-one" aria-hidden="true"></div>
         <div class="auth-aura auth-aura-two" aria-hidden="true"></div>
         <div class="auth-shell">
-          <aside class="auth-hero" aria-label="Megre Master workspace access">
+          <aside class="auth-hero" aria-label="Credit Vault workspace access">
             <div class="auth-brand">
-              <span class="brand-mark">MM</span>
-              <span><strong>Megre Master Oracle Red</strong><small>Credit operations</small></span>
+              <span class="brand-mark">CV</span>
+              <span><strong>Credit Vault</strong><small>Oracle Red workspace</small></span>
               <span class="oracle-lockup"><img src="css/images/oracle_logo.svg" alt="Oracle"></span>
             </div>
             <div class="auth-hero-copy">
               <p class="eyebrow">Welcome to your workspace</p>
-              <h1>One clear place for credit activity.</h1>
+              <h1>Step into your credit command room.</h1>
               <p>Operations teams can manage the complete portfolio. Customers get a focused, read-only view of their own balances and transaction history.</p>
             </div>
             <div class="auth-trust-list" aria-label="Access highlights">
@@ -136,16 +172,44 @@
             <section class="auth-card" aria-describedby="loginHint">
               <div class="auth-card-heading">
                 <p class="eyebrow">Workspace sign in</p>
-                <h2 id="loginTitle">Enter Megre Master</h2>
-                <p>Use your assigned access details to continue.</p>
+                <h2 id="loginTitle">Enter Credit Vault</h2>
+                <p>Choose your access type to continue.</p>
+              </div>
+              <div class="auth-role-switch" role="tablist" aria-label="Login type">
+                <button type="button" role="tab" data-bind="click: function() { selectLoginRole('customer'); }, css: { active: loginRole() === 'customer' }, attr: { 'aria-selected': loginRole() === 'customer' }">Customer</button>
+                <button type="button" role="tab" data-bind="click: function() { selectLoginRole('admin'); }, css: { active: loginRole() === 'admin' }, attr: { 'aria-selected': loginRole() === 'admin' }">Admin</button>
               </div>
               <form class="auth-form" data-bind="submit: submitLogin" novalidate="novalidate">
-                <label class="auth-field" for="loginUsername"><span>Username</span><input id="loginUsername" type="text" autocomplete="username" placeholder="Enter admin or your customer name" data-bind="value: loginUsername, valueUpdate: 'input', disable: loginBusy"></label>
-                <label class="auth-field" for="loginPassword"><span>Password</span><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Enter your password" data-bind="value: loginPassword, valueUpdate: 'input', disable: loginBusy"></label>
+                <!-- ko if: loginRole() === 'admin' -->
+                <label class="auth-field" for="loginUsername"><span>Admin username</span><input id="loginUsername" type="text" autocomplete="username" placeholder="Enter admin username" data-bind="value: loginUsername, valueUpdate: 'input', disable: loginBusy"></label>
+                <label class="auth-field" for="loginPassword"><span>Admin password</span><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Enter admin password" data-bind="value: loginPassword, valueUpdate: 'input', disable: loginBusy"></label>
+                <!-- /ko -->
+                <!-- ko if: loginRole() === 'customer' -->
+                <div class="auth-method-switch" role="tablist" aria-label="Customer login method">
+                  <button type="button" role="tab" data-bind="click: function() { selectCustomerAuthMethod('otp'); }, css: { active: customerAuthMethod() === 'otp' }, attr: { 'aria-selected': customerAuthMethod() === 'otp' }">First-time OTP</button>
+                  <button type="button" role="tab" data-bind="click: function() { selectCustomerAuthMethod('password'); }, css: { active: customerAuthMethod() === 'password' }, attr: { 'aria-selected': customerAuthMethod() === 'password' }">Customer login</button>
+                </div>
+                <!-- ko if: customerAuthMethod() === 'otp' -->
+                <label class="auth-field" for="customerMobile"><span>Registered mobile number</span><input id="customerMobile" type="tel" inputmode="numeric" autocomplete="tel" maxlength="15" placeholder="Enter registered mobile number" data-bind="value: customerMobile, valueUpdate: 'input', disable: loginBusy() || otpRequested()"></label>
+                <button class="auth-secondary-action" type="button" data-bind="click: sendCustomerOtp, disable: loginBusy() || otpRequested()">Send OTP</button>
+                <!-- ko if: otpRequested() -->
+                <div class="auth-otp-note">Demo OTP generated in the toast. It expires in 5 minutes.</div>
+                <label class="auth-field" for="customerOtp"><span>OTP</span><input id="customerOtp" type="text" inputmode="numeric" maxlength="6" placeholder="Enter OTP" data-bind="value: customerOtp, valueUpdate: 'input', disable: loginBusy"></label>
+                <label class="auth-field" for="setupCustomerName"><span>Customer name</span><input id="setupCustomerName" type="text" autocomplete="name" maxlength="100" placeholder="Enter existing customer name" data-bind="value: setupCustomerName, valueUpdate: 'input', disable: loginBusy"></label>
+                <label class="auth-field" for="setupPassword"><span>Create password</span><input id="setupPassword" type="password" autocomplete="new-password" maxlength="100" placeholder="Choose future password" data-bind="value: setupPassword, valueUpdate: 'input', disable: loginBusy"></label>
+                <label class="auth-field" for="setupConfirmPassword"><span>Confirm password</span><input id="setupConfirmPassword" type="password" autocomplete="new-password" maxlength="100" placeholder="Confirm future password" data-bind="value: setupConfirmPassword, valueUpdate: 'input', disable: loginBusy"></label>
+                <!-- /ko -->
+                <!-- /ko -->
+                <!-- ko if: customerAuthMethod() === 'password' -->
+                <div class="auth-otp-note">Use this only after completing first-time OTP setup and setting your password.</div>
+                <label class="auth-field" for="loginUsername"><span>Customer name</span><input id="loginUsername" type="text" autocomplete="name" placeholder="Enter customer name" data-bind="value: loginUsername, valueUpdate: 'input', disable: loginBusy"></label>
+                <label class="auth-field" for="loginPassword"><span>Password</span><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Enter customer password" data-bind="value: loginPassword, valueUpdate: 'input', disable: loginBusy"></label>
+                <!-- /ko -->
+                <!-- /ko -->
                 <div class="auth-error" role="alert" data-bind="visible: loginError, text: loginError"></div>
                 <button class="auth-submit" type="submit" data-motion-interactive="true" data-bind="disable: loginBusy"><span data-bind="text: loginBusy() ? 'Checking access...' : 'Sign in'"></span><span aria-hidden="true">&#8594;</span></button>
               </form>
-              <p id="loginHint" class="auth-hint">Use the credentials assigned to your workspace profile.</p>
+              <p id="loginHint" class="auth-hint">Customer first login uses registered mobile OTP, then customer name and password for future access.</p>
             </section>
           </div>
         </div>
@@ -154,7 +218,7 @@
 
       <!-- ko if: isAuthenticated -->
       <oj-drawer-popup id="navDrawer" edge="start" opened="{{sideDrawerOn}}" modality="modeless" role="navigation" class="app-mobile-drawer" on-opened-changed="[[openedChangedHandler]]">
-        <div class="drawer-brand"><span class="brand-mark">MM</span><span>Megre Master</span></div>
+        <div class="drawer-brand"><span class="brand-mark">CV</span><span>Credit Vault</span></div>
         <oj-navigation-list id="navDrawerList" data="[[navDataProvider]]" item.renderer="[[oj.KnockoutTemplateUtils.getRenderer('navTemplate', true)]]" on-click="[[toggleDrawer]]" selection="{{selection.path}}"></oj-navigation-list>
       </oj-drawer-popup>
 
@@ -162,11 +226,11 @@
         <header role="banner" class="app-header">
           <div class="app-header-inner">
             <button id="drawerToggleButton" class="drawer-toggle" type="button" aria-label="Open navigation" data-bind="click: toggleDrawer">☰</button>
-            <a class="app-brand" href="?root=dashboard" aria-label="Megre Master dashboard"><span class="brand-mark">MM</span><span><strong data-bind="text: appName"></strong><small>Credit operations</small></span><span class="oracle-lockup"><img src="css/images/oracle_logo.svg" alt="Oracle"></span></a>
+            <a class="app-brand" href="?root=dashboard" aria-label="Credit Vault dashboard"><span class="brand-mark">CV</span><span><strong data-bind="text: appName"></strong><small>Credit operations</small></span><span class="oracle-lockup"><img src="css/images/oracle_logo.svg" alt="Oracle"></span></a>
             <div class="header-spacer"></div>
             <div class="header-account">
               <div class="header-user"><span class="header-user-dot"></span><span class="header-user-copy"><strong data-bind="text: userLogin"></strong><small data-bind="text: userRole"></small></span></div>
-              <button class="header-logout" type="button" data-motion-interactive="true" data-bind="click: logout" aria-label="Sign out of Megre Master"><span aria-hidden="true">&#8618;</span><span>Logout</span></button>
+              <button class="header-logout" type="button" data-motion-interactive="true" data-bind="click: logout" aria-label="Sign out of Credit Vault"><span aria-hidden="true">&#8618;</span><span>Logout</span></button>
             </div>
           </div>
           <nav class="app-nav" aria-label="Primary navigation">
@@ -179,7 +243,7 @@
         </main>
 
         <footer class="app-footer" role="contentinfo">
-          <div><span class="brand-mark brand-mark-small">MM</span><span>Megre Master Oracle Red · Credit operations console</span></div>
+          <div><span class="brand-mark brand-mark-small">CV</span><span>Credit Vault · Oracle Red credit operations</span></div>
           <ul>
             <oj-bind-for-each data="[[footerDataProvider]]">
               <template><li><a :id="[[$current.data.linkId]]" :href="[[$current.data.linkTarget]]"><oj-bind-text value="[[$current.data.name]]"></oj-bind-text></a></li></template>

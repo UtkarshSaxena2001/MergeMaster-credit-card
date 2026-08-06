@@ -473,7 +473,7 @@ define([
       this.toastVisible = appState.toastVisible;
       this.dismissToast = appState.dismissToast;
       this.sideDrawerOn = ko.observable(false);
-      this.appName = ko.observable("Megre Master Oracle Red");
+      this.appName = ko.observable("Credit Vault");
       this.isAuthenticated = appState.isAuthenticated;
       this.isAdmin = appState.isAdmin;
       this.isCustomer = appState.isCustomer;
@@ -483,9 +483,21 @@ define([
       this.loginPassword = ko.observable("");
       this.loginBusy = ko.observable(false);
       this.loginError = ko.observable("");
+      this.loginRole = ko.observable("customer");
+      this.customerAuthMethod = ko.observable("otp");
+      this.customerMobile = ko.observable("");
+      this.customerOtp = ko.observable("");
+      this.otpRequested = ko.observable(false);
+      this.localCustomerOtp = ko.observable("");
+      this.localOtpCustomer = ko.observable(null);
+      this.setupCustomerName = ko.observable("");
+      this.setupPassword = ko.observable("");
+      this.setupConfirmPassword = ko.observable("");
+      this.loginReady = ko.observable(false);
       this.loginIntroVisible = ko.observable(false);
       this.loginIntroLogoVisible = ko.observable(false);
       this.loginIntroTimers = [];
+      this.loginIntroNext = null;
       this.footerLinks = ko.observableArray([]);
       this.footerDataProvider = null;
       this.navItems = ko.observableArray([]);
@@ -988,17 +1000,21 @@ define([
         this.clearLoginIntroTimers();
         this.loginIntroLogoVisible(false);
         this.loginIntroVisible(false);
+        const next = this.loginIntroNext;
+        this.loginIntroNext = null;
+        if (typeof next === "function") next();
       };
       this.revealLoginIntroLogo = () => {
         if (!this.loginIntroVisible() || this.loginIntroLogoVisible()) return;
         this.loginIntroLogoVisible(true);
         this.loginIntroTimers.push(window.setTimeout(this.finishLoginIntro, 1400));
       };
-      this.startLoginIntro = () => {
+      this.startLoginIntro = (next) => {
         this.clearLoginIntroTimers();
+        this.loginIntroNext = typeof next === "function" ? next : null;
         this.loginIntroLogoVisible(false);
         this.loginIntroVisible(true);
-        this.loginIntroTimers.push(window.setTimeout(this.revealLoginIntroLogo, 6000));
+        this.loginIntroTimers.push(window.setTimeout(this.revealLoginIntroLogo, 3500));
         window.setTimeout(() => {
           const video = document.querySelector(".login-intro-video");
           if (video && typeof video.play === "function") {
@@ -1008,10 +1024,44 @@ define([
           }
         }, 0);
       };
+      this.setLoginHistoryState = () => {
+        if (this.isAuthenticated()) return;
+        const url = new URL(window.location.href);
+        if (url.searchParams.get("cvLogin") === "1") return;
+        url.searchParams.set("cvLogin", "1");
+        window.history.pushState({ creditVaultLogin: true }, "", url.toString());
+      };
+      this.clearLoginHistoryState = () => {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get("cvLogin") !== "1") return;
+        url.searchParams.delete("cvLogin");
+        window.history.replaceState({ creditVaultHome: true }, "", url.toString());
+      };
+      this.handleBrowserBack = () => {
+        if (this.isAuthenticated()) return;
+        const url = new URL(window.location.href);
+        if (url.searchParams.get("cvLogin") === "1") return;
+        this.finishLoginIntro();
+        this.loginReady(false);
+        this.loginError("");
+        document.title = "Credit Vault";
+      };
+      this.enterLogin = () => {
+        this.setLoginHistoryState();
+        this.startLoginIntro(() => {
+          this.loginReady(true);
+          document.title = "Credit Vault | Sign in";
+          this.focusLoginInput();
+        });
+      };
       this.completeLogin = (session) => {
         appState.startSession(session);
         this.loginError("");
         this.loginPassword("");
+        this.customerOtp("");
+        this.otpRequested(false);
+        this.setupPassword("");
+        this.setupConfirmPassword("");
         this.assistantOpen(false);
         this.assistantUnread(true);
         this.assistantRequestVersion += 1;
@@ -1019,8 +1069,172 @@ define([
         this.applyRoleNavigation();
         this.clearAssistantConversation();
         this.goToRoute("dashboard");
-        this.startLoginIntro();
         appState.notify(`Welcome, ${session.userName}.`, "success");
+      };
+      this.resetCustomerLoginState = () => {
+        this.loginError("");
+        this.customerMobile("");
+        this.customerOtp("");
+        this.otpRequested(false);
+        this.localCustomerOtp("");
+        this.localOtpCustomer(null);
+        this.setupCustomerName("");
+        this.setupPassword("");
+        this.setupConfirmPassword("");
+      };
+      this.selectLoginRole = (role) => {
+        this.loginRole(role);
+        this.loginError("");
+        this.loginUsername("");
+        this.loginPassword("");
+        this.resetCustomerLoginState();
+      };
+      this.selectCustomerAuthMethod = (method) => {
+        this.customerAuthMethod(method);
+        this.loginError("");
+        this.customerOtp("");
+        this.otpRequested(false);
+        this.localCustomerOtp("");
+        this.localOtpCustomer(null);
+      };
+      this.maskMobileNumber = (mobileNumber) => {
+        const digits = String(mobileNumber || "").replace(/\D/g, "");
+        if (digits.length <= 4) return digits;
+        return `${"*".repeat(Math.max(0, digits.length - 4))}${digits.slice(-4)}`;
+      };
+      this.createDemoOtp = () => String(Math.floor(100000 + Math.random() * 900000));
+      this.buildCustomerUpdateInput = (customer, password) => ({
+        customerName: customer.customerName,
+        password,
+        email: customer.email,
+        mobileNumber: customer.mobileNumber,
+        panNumber: customer.panNumber
+      });
+      this.requestLocalCustomerOtp = async (mobile) => {
+        const customers = asArray(await api.getCustomers());
+        const customer = customers.find((item) => String(item.mobileNumber || "").trim() === mobile);
+        if (!customer || !customer.customerId) {
+          throw new Error("No customer account is registered with that mobile number.");
+        }
+        const otp = this.createDemoOtp();
+        this.localOtpCustomer(customer);
+        this.localCustomerOtp(otp);
+        this.setupCustomerName(customer.customerName || "");
+        return { message: `Demo OTP for ${mobile} is ${otp}.`, customerName: customer.customerName || "" };
+      };
+      this.setupLocalCustomerLogin = async (mobile, otp, customerName, password) => {
+        const customer = this.localOtpCustomer();
+        if (!customer || String(customer.mobileNumber || "").trim() !== mobile) {
+          throw new Error("Request an OTP for your registered mobile number first.");
+        }
+        if (otp !== this.localCustomerOtp()) {
+          throw new Error("Enter the correct demo OTP shown in the toast.");
+        }
+        if (this.normalizeLoginName(customer.customerName) !== this.normalizeLoginName(customerName)) {
+          throw new Error("Customer name does not match this registered mobile number.");
+        }
+        const updatedCustomer = await api.updateCustomer(
+          customer.customerId,
+          this.buildCustomerUpdateInput(customer, password)
+        );
+        this.localCustomerOtp("");
+        this.localOtpCustomer(null);
+        return updatedCustomer;
+      };
+      this.persistCustomerPassword = async (customerId, password) => {
+        const customers = asArray(await api.getCustomers());
+        const customer = customers.find((item) => Number(item.customerId) === Number(customerId));
+        if (!customer || !customer.customerId) {
+          throw new Error("Password setup completed, but the customer record could not be reloaded for database update.");
+        }
+        if (String(customer.password || "").trim() === String(password || "").trim()) {
+          return customer;
+        }
+        return api.updateCustomer(
+          customer.customerId,
+          this.buildCustomerUpdateInput(customer, password)
+        );
+      };
+      this.loginLocalCustomer = async (customerName, password) => {
+        const customers = asArray(await api.getCustomers());
+        const customer = customers.find((item) => this.normalizeLoginName(item.customerName) === this.normalizeLoginName(customerName));
+        if (!customer || !customer.customerId) {
+          throw new Error("We could not find that customer name. If this is your first login, use First-time OTP.");
+        }
+        if (String(customer.password || "").trim() !== String(password || "").trim()) {
+          throw new Error("The password does not match this customer account.");
+        }
+        return customer;
+      };
+      this.sendCustomerOtp = async () => {
+        const mobile = String(this.customerMobile() || "").trim();
+        this.loginError("");
+        if (!/^\d{10,15}$/.test(mobile)) {
+          this.loginError("Enter the registered mobile number with 10 to 15 digits.");
+          return;
+        }
+        this.loginBusy(true);
+        try {
+          let response;
+          try {
+            response = await api.requestCustomerOtp({ mobileNumber: mobile });
+          } catch (error) {
+            if (!error || (error.status !== 404 && error.status !== 500)) throw error;
+            response = await this.requestLocalCustomerOtp(mobile);
+          }
+          this.otpRequested(true);
+          this.customerOtp("");
+          this.setupCustomerName(response.customerName || "");
+          appState.notify(response.message || `Demo OTP sent for ${mobile}.`, "info");
+        } catch (error) {
+          this.loginError(error instanceof Error ? error.message : "Could not start OTP verification.");
+        } finally {
+          this.loginBusy(false);
+        }
+      };
+      this.verifyCustomerOtpAndSetup = async () => {
+        const otp = String(this.customerOtp() || "").trim();
+        const mobile = String(this.customerMobile() || "").trim();
+        const customerName = String(this.setupCustomerName() || "").trim();
+        const password = String(this.setupPassword() || "").trim();
+        const confirmPassword = String(this.setupConfirmPassword() || "").trim();
+        this.loginError("");
+        if (!this.otpRequested()) {
+          this.loginError("Request an OTP for your registered mobile number first.");
+          return;
+        }
+        if (customerName.length < 2) {
+          this.loginError("Enter the customer name exactly as saved in the database.");
+          return;
+        }
+        if (password.length < 4) {
+          this.loginError("Choose a password with at least four characters.");
+          return;
+        }
+        if (password !== confirmPassword) {
+          this.loginError("Password and confirm password must match.");
+          return;
+        }
+        this.loginBusy(true);
+        try {
+          let updatedCustomer;
+          try {
+            updatedCustomer = await api.setupCustomerLogin({ mobileNumber: mobile, otp, customerName, password });
+            updatedCustomer = await this.persistCustomerPassword(updatedCustomer.customerId, password);
+          } catch (error) {
+            if (!error || (error.status !== 404 && error.status !== 500)) throw error;
+            updatedCustomer = await this.setupLocalCustomerLogin(mobile, otp, customerName, password);
+          }
+          this.completeLogin({
+            role: "customer",
+            userName: updatedCustomer.customerName,
+            customerId: updatedCustomer.customerId
+          });
+        } catch (error) {
+          this.loginError(error instanceof Error ? error.message : "Could not save customer login details.");
+        } finally {
+          this.loginBusy(false);
+        }
       };
       this.submitLogin = async (_form, event) => {
         if (event && typeof event.preventDefault === "function") event.preventDefault();
@@ -1030,26 +1244,34 @@ define([
         const normalizedPassword = this.normalizeLoginName(password);
         this.loginError("");
 
-        if (!username || !password) {
-          this.loginError("Enter both your username and password.");
+        if (this.loginRole() === "admin") {
+          if (!username || !password) {
+            this.loginError("Enter the admin username and password.");
+            return false;
+          }
+          if (normalizedUsername !== "admin" || normalizedPassword !== "admin") {
+            this.loginError("Admin credentials are not valid.");
+            return false;
+          }
+          this.completeLogin({ role: "admin", userName: "Administrator" });
           return false;
         }
-        if (normalizedUsername === "admin" && normalizedPassword === "admin") {
-          this.completeLogin({ role: "admin", userName: "Administrator" });
+        if (this.customerAuthMethod() === "otp") {
+          await this.verifyCustomerOtpAndSetup();
+          return false;
+        }
+        if (!username || !password) {
+          this.loginError("Enter your customer name and password.");
           return false;
         }
         this.loginBusy(true);
         try {
-          const customers = asArray(await api.getCustomers());
-          const customer = customers.find((item) => this.normalizeLoginName(item.customerName) === normalizedUsername);
-          if (!customer || !customer.customerId) {
-            this.loginError("We could not find a customer account matching that name.");
-            return false;
-          }
-          const storedPassword = String(customer.password || customer.customerName || "").trim();
-          if (this.normalizeLoginName(storedPassword) !== normalizedPassword) {
-            this.loginError("The password does not match this customer account.");
-            return false;
+          let customer;
+          try {
+            customer = await api.loginCustomer({ customerName: username, password });
+          } catch (error) {
+            if (!error || (error.status !== 404 && error.status !== 500)) throw error;
+            customer = await this.loginLocalCustomer(username, password);
           }
           this.completeLogin({
             role: "customer",
@@ -1076,7 +1298,9 @@ define([
         this.loginUsername("");
         this.loginPassword("");
         this.loginError("");
+        this.loginReady(false);
         this.finishLoginIntro();
+        this.clearLoginHistoryState();
         appState.dismissToast();
         appState.endSession();
         this.applyRoleNavigation();
@@ -1084,9 +1308,13 @@ define([
           const navigation = this.router.go({ path: "dashboard" });
           if (navigation && typeof navigation.catch === "function") navigation.catch(() => {});
         }
-        document.title = "Megre Master Oracle Red | Sign in";
-        this.focusLoginInput();
+        document.title = "Credit Vault";
       };
+      window.addEventListener("popstate", this.handleBrowserBack);
+      if (!this.isAuthenticated() && new URL(window.location.href).searchParams.get("cvLogin") === "1") {
+        this.loginReady(true);
+        document.title = "Credit Vault | Sign in";
+      }
       const initialAssistantRoute = this.getAssistantRoute();
       this.assistantRoute(initialAssistantRoute);
       this.assistantMessages([this.makeAssistantWelcome(initialAssistantRoute)]);

@@ -1,5 +1,6 @@
 package customer;
 
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Locale;
 
@@ -11,7 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class CustomerServiceImpl implements CustomerService {
 
+    private static final String PASSWORD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+    private static final int GENERATED_PASSWORD_LENGTH = 10;
+
     private final CustomerRepository customerRepository;
+    private final SecureRandom secureRandom = new SecureRandom();
 
     public CustomerServiceImpl(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
@@ -31,8 +36,7 @@ public class CustomerServiceImpl implements CustomerService {
         try {
             return toResponse(customerRepository.saveAndFlush(customer));
         } catch (DataIntegrityViolationException exception) {
-            throw new IllegalArgumentException(
-                    "Email, mobile number, or PAN number is already registered");
+            throw new IllegalArgumentException(buildCreateConflictMessage(email, mobileNumber, panNumber));
         }
     }
 
@@ -49,8 +53,7 @@ public class CustomerServiceImpl implements CustomerService {
         try {
             return toResponse(customerRepository.saveAndFlush(customer));
         } catch (DataIntegrityViolationException exception) {
-            throw new IllegalArgumentException(
-                    "Email, mobile number, or PAN number is already registered");
+            throw new IllegalArgumentException(buildUpdateConflictMessage(customerId, email, mobileNumber, panNumber));
         }
     }
 
@@ -99,6 +102,19 @@ public class CustomerServiceImpl implements CustomerService {
         }
     }
 
+    private String buildCreateConflictMessage(String email, String mobileNumber, String panNumber) {
+        if (customerRepository.existsByEmailIgnoreCase(email)) {
+            return "Email is already registered";
+        }
+        if (customerRepository.existsByMobileNumber(mobileNumber)) {
+            return "Mobile number is already registered";
+        }
+        if (customerRepository.existsByPanNumberIgnoreCase(panNumber)) {
+            return "PAN number is already registered";
+        }
+        return "Customer could not be saved. Check that email, mobile number, and PAN are valid and unique.";
+    }
+
     private void validateUniqueForUpdate(Long customerId, String email,
                                          String mobileNumber, String panNumber) {
         if (customerRepository.existsByEmailIgnoreCaseAndCustomerIdNot(email, customerId)) {
@@ -110,6 +126,19 @@ public class CustomerServiceImpl implements CustomerService {
         if (customerRepository.existsByPanNumberIgnoreCaseAndCustomerIdNot(panNumber, customerId)) {
             throw new IllegalArgumentException("PAN number belongs to another customer");
         }
+    }
+
+    private String buildUpdateConflictMessage(Long customerId, String email, String mobileNumber, String panNumber) {
+        if (customerRepository.existsByEmailIgnoreCaseAndCustomerIdNot(email, customerId)) {
+            return "Email belongs to another customer";
+        }
+        if (customerRepository.existsByMobileNumberAndCustomerIdNot(mobileNumber, customerId)) {
+            return "Mobile number belongs to another customer";
+        }
+        if (customerRepository.existsByPanNumberIgnoreCaseAndCustomerIdNot(panNumber, customerId)) {
+            return "PAN number belongs to another customer";
+        }
+        return "Customer could not be updated. Check that email, mobile number, and PAN are valid and unique.";
     }
 
     private void updateEntity(Customer customer, CustomerRequest request,
@@ -129,7 +158,15 @@ public class CustomerServiceImpl implements CustomerService {
         if (currentPassword != null && !currentPassword.trim().isEmpty()) {
             return currentPassword.trim();
         }
-        return customerName;
+        return generateInitialPassword();
+    }
+
+    private String generateInitialPassword() {
+        StringBuilder password = new StringBuilder(GENERATED_PASSWORD_LENGTH);
+        for (int index = 0; index < GENERATED_PASSWORD_LENGTH; index += 1) {
+            password.append(PASSWORD_ALPHABET.charAt(secureRandom.nextInt(PASSWORD_ALPHABET.length())));
+        }
+        return password.toString();
     }
 
     private CustomerResponse toResponse(Customer customer) {
@@ -149,4 +186,5 @@ public class CustomerServiceImpl implements CustomerService {
     private String normalizePan(String panNumber) {
         return panNumber.trim().toUpperCase(Locale.ROOT);
     }
+
 }

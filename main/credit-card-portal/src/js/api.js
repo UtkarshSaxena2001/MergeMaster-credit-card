@@ -67,6 +67,9 @@ define([], function () {
     createCustomer: (input) => request("/api/customers", { method: "POST", ...jsonBody(input) }),
     updateCustomer: (id, input) => request(`/api/customers/${id}`, { method: "PUT", ...jsonBody(input) }),
     deleteCustomer: (id) => request(`/api/customers/${id}`, { method: "DELETE" }),
+    requestCustomerOtp: (input) => request("/api/auth/customer/otp/request", { method: "POST", ...jsonBody(input) }),
+    setupCustomerLogin: (input) => request("/api/auth/customer/otp/setup", { method: "POST", ...jsonBody(input) }),
+    loginCustomer: (input) => request("/api/auth/customer/login", { method: "POST", ...jsonBody(input) }),
 
     getCards: () => request("/api/creditcards"),
     createCard: (input) => request("/api/creditcards", { method: "POST", ...jsonBody(input) }),

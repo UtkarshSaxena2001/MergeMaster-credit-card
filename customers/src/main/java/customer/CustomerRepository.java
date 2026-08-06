@@ -1,5 +1,7 @@
 package customer;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,9 +14,14 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     boolean existsByPanNumberIgnoreCase(String panNumber);
 
+    Optional<Customer> findByMobileNumber(String mobileNumber);
+
+    Optional<Customer> findByCustomerNameIgnoreCase(String customerName);
+
     boolean existsByEmailIgnoreCaseAndCustomerIdNot(String email, Long customerId);
 
     boolean existsByMobileNumberAndCustomerIdNot(String mobileNumber, Long customerId);
 
     boolean existsByPanNumberIgnoreCaseAndCustomerIdNot(String panNumber, Long customerId);
+
 }

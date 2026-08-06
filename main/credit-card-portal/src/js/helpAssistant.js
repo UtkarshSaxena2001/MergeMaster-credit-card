@@ -1,5 +1,5 @@
 /**
- * Local, route-aware help content for MergeMaster.
+ * Local, route-aware help content for Credit Vault.
  *
  * This module deliberately has no UI, network, or Knockout dependency.  It is
  * safe to load from appController and can also be reused by individual views.
@@ -87,7 +87,7 @@ define([], function () {
   var KNOWLEDGE_BASE = [
     {
       id: "getting-started",
-      title: "Getting started in MergeMaster",
+      title: "Getting started in Credit Vault",
       body: "A simple setup flow is to create a customer, issue a card, add merchant partners, then record purchases or payments.",
       steps: [
         "Open Customers and add the cardholder’s details.",
@@ -149,7 +149,7 @@ define([], function () {
     {
       id: "add-customer",
       title: "Add a customer",
-      body: "Create the customer record before issuing a card. MergeMaster asks for a name, email address, mobile number, and PAN number.",
+      body: "Create the customer record before issuing a card. Credit Vault asks for a name, email address, mobile number, and PAN number.",
       steps: [
         "Open Customers.",
         "Select Add customer.",
@@ -713,7 +713,7 @@ define([], function () {
 
   function getRouteLabel(route) {
     var resolved = resolveRoute(route);
-    return resolved && ROUTES[resolved] ? ROUTES[resolved].label : "MergeMaster";
+    return resolved && ROUTES[resolved] ? ROUTES[resolved].label : "Credit Vault";
   }
 
   function hasWholePhrase(text, phrase) {
@@ -901,7 +901,7 @@ define([], function () {
     var routeData = ROUTES[activeRoute];
     return {
       id: "fallback",
-      title: "I can help with MergeMaster",
+      title: "I can help with Credit Vault",
       body: "I can explain how to use " + routeData.label + ", or guide you through customers, cards, merchants, transactions, and dashboard data.",
       steps: ["Try one of the suggested questions, or ask in everyday words."],
       action: null,

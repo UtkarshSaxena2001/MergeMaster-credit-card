@@ -43,7 +43,7 @@ browser console and refresh the page.
 
 - **Administrator:** username `admin`, password `admin`. This retains the full
   operations portal.
-- **Customer:** enter the customer record's exact name as the username. Existing
+- **Customer:** enter the customer record's exact name and password. Existing
   customers start with their customer name as the password, and admins can assign
   a different customer password from the Customers page. Customer access is
   limited to that customer's dashboard and transaction history; it is read-only

@@ -1,7 +1,15 @@
 main\CorsFilterConfig$1.class
 main\ApiCorsConfiguration.class
+main\auth\OtpSetupRequest.class
 main\CorsFilterConfig.class
 main\DatabaseStatusController.class
+main\auth\CustomerLoginRequest.class
+main\auth\AuthExceptionHandler.class
+main\MainApp.class
+main\auth\CustomerAuthService$OtpChallenge.class
+main\auth\OtpRequest.class
+main\auth\CustomerAuthService.class
 main\DataInitializer.class
 main\HomeController.class
-main\MainApp.class
+main\auth\AuthResponse.class
+main\auth\CustomerAuthController.class

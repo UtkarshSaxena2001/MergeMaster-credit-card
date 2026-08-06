@@ -142,7 +142,7 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
 
     connected() {
       AccUtils.announce("Cards page loaded.");
-      document.title = "MergeMaster | Cards";
+      document.title = "Credit Vault | Cards";
       void this.refresh();
     }
 

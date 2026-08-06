@@ -37,7 +37,7 @@ class.
 The integrated application starts on `http://localhost:8080` and validates the
 existing Oracle FREE schema. H2 is used only by automated tests.
 
-If your Oracle `CUSTOMER` table already exists, add the customer login password
+If your Oracle `CUSTOMER` table already exists, make sure it has a password
 column once before starting the backend:
 
 ```sql
@@ -45,6 +45,11 @@ ALTER TABLE customer ADD password VARCHAR2(100);
 UPDATE customer SET password = customer_name WHERE password IS NULL;
 ALTER TABLE customer MODIFY password NOT NULL;
 ```
+
+Customer first-time login uses a demo OTP shown in the UI toast. After OTP
+verification, the customer confirms their existing customer name and sets the
+password stored in the `CUSTOMER.PASSWORD` column. Future login uses customer
+name and password.
 
 ## Oracle JET portal
 

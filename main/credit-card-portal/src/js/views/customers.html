@@ -33,10 +33,12 @@
         <span>Full name</span>
         <input type="text" maxlength="100" autocomplete="name" placeholder="e.g. Aarav Sharma" data-bind="value: customerName, valueUpdate: 'input'">
       </label>
-      <label class="field field-span-2">
-        <span>Login password</span>
-        <input type="text" maxlength="100" autocomplete="new-password" placeholder="Defaults to customer name" data-bind="value: password, valueUpdate: 'input'">
-      </label>
+      <div class="field-help field-span-2" data-bind="visible: !isEditing()">
+        A secure temporary password will be generated automatically. The customer changes it during first-time OTP setup.
+      </div>
+      <div class="field-help field-span-2" data-bind="visible: isEditing()">
+        Customer password is preserved here. Ask the customer to reset it through first-time OTP setup.
+      </div>
       <label class="field">
         <span>Email address</span>
         <input type="email" maxlength="100" autocomplete="email" placeholder="name@example.com" data-bind="value: email, valueUpdate: 'input'">

@@ -72,3 +72,10 @@ select * from transactions;
 ALTER TABLE customer ADD password VARCHAR2(100);
 UPDATE customer SET password = customer_name WHERE password IS NULL;
 ALTER TABLE customer MODIFY password NOT NULL;
+
+
+SELECT customer_name, email, mobile_number, pan_number
+FROM customer
+WHERE LOWER(email) = 'sagar123@gmail.com'
+   OR mobile_number = '4563289012'
+   OR UPPER(pan_number) = 'ALDUE3452L';

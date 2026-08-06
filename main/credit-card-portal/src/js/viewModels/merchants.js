@@ -93,7 +93,7 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
 
     connected() {
       AccUtils.announce("Merchants page loaded.");
-      document.title = "MergeMaster | Merchants";
+      document.title = "Credit Vault | Merchants";
       void this.refresh();
     }
 
