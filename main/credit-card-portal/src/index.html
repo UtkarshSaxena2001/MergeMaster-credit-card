@@ -253,7 +253,7 @@
                 <!-- /ko -->
                 <!-- ko if: loginRole() === 'customer' -->
                 <div class="auth-method-switch" role="tablist" aria-label="Customer login method">
-                  <button type="button" role="tab" data-bind="click: function() { selectCustomerAuthMethod('otp'); }, css: { active: customerAuthMethod() === 'otp' }, attr: { 'aria-selected': customerAuthMethod() === 'otp' }">First-time OTP</button>
+                  <button type="button" role="tab" data-bind="click: function() { selectCustomerAuthMethod('otp'); }, css: { active: customerAuthMethod() === 'otp' }, attr: { 'aria-selected': customerAuthMethod() === 'otp' }">Reset password / first-time registration</button>
                   <button type="button" role="tab" data-bind="click: function() { selectCustomerAuthMethod('password'); }, css: { active: customerAuthMethod() === 'password' }, attr: { 'aria-selected': customerAuthMethod() === 'password' }">Customer login</button>
                 </div>
                 <!-- ko if: customerAuthMethod() === 'otp' -->
@@ -268,7 +268,7 @@
                 <!-- /ko -->
                 <!-- /ko -->
                 <!-- ko if: customerAuthMethod() === 'password' -->
-                <div class="auth-otp-note">Use this only after completing first-time OTP setup and setting your password.</div>
+                <div class="auth-otp-note">Use this only after reset password / first-time registration and setting your password.</div>
                 <label class="auth-field" for="loginUsername"><span>Customer name</span><input id="loginUsername" type="text" autocomplete="name" placeholder="Enter customer name" data-bind="value: loginUsername, valueUpdate: 'input', disable: loginBusy"></label>
                 <label class="auth-field" for="loginPassword"><span>Password</span><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Enter customer password" data-bind="value: loginPassword, valueUpdate: 'input', disable: loginBusy"></label>
                 <!-- /ko -->
@@ -276,7 +276,7 @@
                 <div class="auth-error" role="alert" data-bind="visible: loginError, text: loginError"></div>
                 <button class="auth-submit" type="submit" data-motion-interactive="true" data-bind="disable: loginBusy"><span data-bind="text: loginBusy() ? 'Checking access...' : 'Sign in'"></span><span aria-hidden="true">&#8594;</span></button>
               </form>
-              <p id="loginHint" class="auth-hint">Customer first login uses registered mobile OTP, then customer name and password for future access.</p>
+              <p id="loginHint" class="auth-hint">Customer reset password / first-time registration uses registered mobile OTP, then customer name and password for future access.</p>
             </section>
           </div>
         </div>

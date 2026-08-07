@@ -1172,7 +1172,7 @@ define([
         const customers = asArray(await api.getCustomers());
         const customer = customers.find((item) => this.normalizeLoginName(item.customerName) === this.normalizeLoginName(customerName));
         if (!customer || !customer.customerId) {
-          throw new Error("We could not find that customer name. If this is your first login, use First-time OTP.");
+          throw new Error("We could not find that customer name. Use reset password / first-time registration with your registered mobile number.");
         }
         if (String(customer.password || "").trim() !== String(password || "").trim()) {
           throw new Error("The password does not match this customer account.");

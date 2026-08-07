@@ -57,7 +57,7 @@ public class CustomerAuthService {
         String customerName = normalizeName(request.getCustomerName());
         Customer customer = customerRepository.findByCustomerNameIgnoreCase(customerName)
                 .orElseThrow(() -> new IllegalArgumentException(
-                        "We could not find that customer name. If this is your first login, use First-time OTP."));
+                        "We could not find that customer name. Use reset password / first-time registration with your registered mobile number."));
         if (!customer.getPassword().trim().equals(request.getPassword().trim())) {
             throw new IllegalArgumentException("The password does not match this customer account.");
         }
