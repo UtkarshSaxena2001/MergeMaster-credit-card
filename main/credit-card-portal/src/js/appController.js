@@ -969,8 +969,21 @@ define([
       };
       this.assistantNavigate = (action) => {
         if (!action || !action.route || !this.isRouteAllowed(action.route)) return;
+        if (action.intent) {
+          window.sessionStorage.setItem("creditVault.pendingAction", JSON.stringify({
+            route: action.route,
+            intent: action.intent
+          }));
+        }
         this.closeAssistant();
         window.dispatchEvent(new CustomEvent("mergemaster:navigate", { detail: action.route }));
+        if (action.intent) {
+          window.setTimeout(() => {
+            window.dispatchEvent(new CustomEvent("creditVault:pendingAction", {
+              detail: { route: action.route, intent: action.intent }
+            }));
+          }, 120);
+        }
       };
       this.assistantKeyHandler = (event) => {
         if (event.key === "Escape" && this.assistantOpen()) this.closeAssistant();

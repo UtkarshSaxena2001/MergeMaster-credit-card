@@ -9,7 +9,7 @@
   </header>
 
   <div class="status-panel status-panel-error" data-bind="visible: error">
-    <strong>Couldn’t load cards.</strong><span data-bind="text: error"></span>
+    <strong>Could not load cards.</strong><span data-bind="text: error"></span>
     <button class="link-button" type="button" data-bind="click: refresh">Try again</button>
   </div>
 
@@ -19,7 +19,7 @@
         <p class="eyebrow" data-bind="text: isEditing() ? 'Update card' : 'New card issue'"></p>
         <h2 data-bind="text: isEditing() ? 'Edit card settings' : 'Issue a card'"></h2>
       </div>
-      <button class="icon-button" type="button" aria-label="Close card form" data-bind="click: closeForm">×</button>
+      <button class="icon-button" type="button" aria-label="Close card form" data-bind="click: closeForm">&times;</button>
     </div>
     <form class="form-grid" data-bind="submit: submitForm" novalidate>
       <label class="field field-span-2">
@@ -33,26 +33,11 @@
         <span>Cardholder</span>
         <select data-bind="options: customerOptions, optionsText: 'label', optionsValue: 'id', value: customerId, optionsCaption: 'Select an existing customer'"></select>
       </label>
-      <label class="field">
-        <span>Card tier</span>
-        <select data-bind="options: cardTypes, value: cardType"></select>
-      </label>
-      <label class="field">
-        <span>Status</span>
-        <select data-bind="options: statusOptions, value: cardStatus"></select>
-      </label>
-      <label class="field">
-        <span>Credit limit</span>
-        <input type="number" min="1" step="0.01" inputmode="decimal" data-bind="value: creditLimit, valueUpdate: 'input'">
-      </label>
-      <label class="field">
-        <span>Opening / outstanding balance</span>
-        <input type="number" min="0" step="0.01" inputmode="decimal" data-bind="value: outstandingAmount, valueUpdate: 'input'">
-      </label>
-      <label class="field">
-        <span>Expiry date</span>
-        <input type="date" data-bind="value: expiryDate">
-      </label>
+      <label class="field"><span>Card tier</span><select data-bind="options: cardTypes, value: cardType"></select></label>
+      <label class="field"><span>Status</span><select data-bind="options: statusOptions, value: cardStatus"></select></label>
+      <label class="field"><span>Credit limit</span><input type="number" min="1" step="0.01" inputmode="decimal" data-bind="value: creditLimit, valueUpdate: 'input'"></label>
+      <label class="field"><span>Opening / outstanding balance</span><input type="number" min="0" step="0.01" inputmode="decimal" data-bind="value: outstandingAmount, valueUpdate: 'input'"></label>
+      <label class="field"><span>Expiry date</span><input type="date" data-bind="value: expiryDate"></label>
       <div class="credit-preview field">
         <span>Available credit</span>
         <strong data-bind="text: formatCurrency(availableCredit())"></strong>
@@ -62,7 +47,7 @@
       <div class="form-actions field-span-2">
         <button class="button button-secondary" type="button" data-bind="click: closeForm, disable: formBusy">Cancel</button>
         <button class="button button-primary" type="submit" data-bind="disable: formBusy">
-          <span data-bind="text: formBusy() ? 'Saving…' : (isEditing() ? 'Save card' : 'Issue card')"></span>
+          <span data-bind="text: formBusy() ? 'Saving...' : (isEditing() ? 'Save card' : 'Issue card')"></span>
         </button>
       </div>
     </form>
@@ -70,10 +55,10 @@
 
   <article class="surface-card data-card">
     <div class="data-toolbar">
-      <div class="search-field"><span aria-hidden="true">⌕</span><input type="search" aria-label="Search cards" placeholder="Search card, tier, customer or status" data-bind="value: searchText, valueUpdate: 'input'"></div>
+      <div class="search-field"><span aria-hidden="true">&#8981;</span><input type="search" aria-label="Search cards" placeholder="Search card, tier, customer or status" data-bind="value: searchText, valueUpdate: 'input'"></div>
       <button class="button button-quiet" type="button" data-bind="click: refresh, disable: isLoading">Refresh</button>
     </div>
-    <div class="loading-panel" data-bind="visible: isLoading"><span class="loading-spinner"></span> Loading cards…</div>
+    <div class="loading-panel" data-bind="visible: isLoading"><span class="loading-spinner"></span> Loading cards...</div>
     <div class="card-grid" data-bind="visible: !isLoading() && !error() && filteredCards().length, foreach: filteredCards">
       <article class="credit-card-tile selectable-card-tile" tabindex="0" role="button" aria-label="View card details" data-bind="css: $parent.cardTileClass($data), click: $parent.selectCard, event: { keydown: $parent.selectCardFromKeyboard }">
         <div class="credit-card-topline"><span data-bind="text: cardType + ' CARD'"></span><span class="status-badge" data-bind="css: cardStatus === 'ACTIVE' ? 'status-active' : 'status-blocked', text: cardStatus"></span></div>
@@ -84,11 +69,13 @@
         <div class="card-tile-actions"><button class="text-action" type="button" data-bind="click: $parent.openEdit, clickBubble: false">Manage</button><button class="text-action text-action-danger" type="button" data-bind="click: $parent.deleteCard, clickBubble: false">Delete</button></div>
       </article>
     </div>
-    <div data-bind="if: selectedCard">
-      <article class="credit-card-tile card-detail-panel" data-bind="css: cardTileClass(selectedCard())">
+    <div class="card-detail-modal" data-bind="visible: selectedCard, css: { 'card-detail-modal-open': selectedCard() }">
+      <div class="card-detail-backdrop" data-bind="click: closeCardDetails"></div>
+      <!-- ko if: selectedCard -->
+      <article class="credit-card-tile card-detail-panel modal-card-detail-panel" role="dialog" aria-modal="true" aria-label="Credit card details" data-bind="css: cardTileClass(selectedCard())">
         <div class="credit-card-topline">
           <span data-bind="text: selectedCard().cardType + ' CARD DETAILS'"></span>
-          <button class="card-detail-close" type="button" aria-label="Close card details" data-bind="click: closeCardDetails">×</button>
+          <button class="card-detail-close" type="button" aria-label="Close card details" data-bind="click: closeCardDetails">&times;</button>
         </div>
         <div class="credit-card-number" data-bind="text: maskCardNumber(selectedCard().cardNumber)"></div>
         <div class="credit-card-name" data-bind="text: customerLabel(selectedCard())"></div>
@@ -96,6 +83,7 @@
           <span><small data-bind="text: label"></small><strong data-bind="text: value"></strong></span>
         </div>
       </article>
+      <!-- /ko -->
     </div>
     <div class="empty-state" data-bind="visible: !isLoading() && !error() && filteredCards().length === 0">
       <strong data-bind="text: searchText() ? 'No matching cards' : 'No cards in the portfolio'"></strong>

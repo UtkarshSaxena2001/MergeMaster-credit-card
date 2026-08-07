@@ -95,7 +95,7 @@ define([], function () {
         "Add a merchant before posting a purchase.",
         "Use Transactions to record purchases and payments."
       ],
-      action: { label: "Open Customers", route: "customers" },
+      action: { label: "Add customer now", route: "customers", intent: "createCustomer" },
       routes: ["dashboard", "customers", "cards", "merchants", "transactions"],
       keywords: ["start", "getting", "begin", "setup", "use", "website", "app", "workflow"],
       phrases: ["how do i use", "how to use", "get started", "where do i start", "use this website", "use this app"],
@@ -853,6 +853,7 @@ define([], function () {
     return {
       label: action.label,
       route: action.route,
+      intent: action.intent || null,
       type: "navigate"
     };
   }

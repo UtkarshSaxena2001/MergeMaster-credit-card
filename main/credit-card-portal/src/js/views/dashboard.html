@@ -197,6 +197,42 @@
         <div class="empty-inline" data-bind="visible: topMerchants().length === 0">No purchase merchant totals yet.</div>
       </article>
     </div>
+    <article class="surface-card api-control-panel">
+      <div class="surface-card-header">
+        <div>
+          <p class="eyebrow">API controls</p>
+          <h2>Manage portal records</h2>
+        </div>
+        <span class="api-live-pill">Admin only</span>
+      </div>
+      <p class="api-control-copy">Create, update, delete, and review the live data behind Credit Vault from one control hub.</p>
+      <div class="api-control-grid">
+        <button class="api-control-card" type="button" data-bind="click: function() { navigate('customers'); }">
+          <span class="api-control-icon">👥</span>
+          <strong>Customers API</strong>
+          <small>Add fresh customers, modify profiles, or remove test records.</small>
+          <span class="api-method-row"><i>GET</i><i>POST</i><i>PUT</i><i class="api-method-delete">DELETE</i></span>
+        </button>
+        <button class="api-control-card" type="button" data-bind="click: function() { navigate('cards'); }">
+          <span class="api-control-icon">💳</span>
+          <strong>Cards API</strong>
+          <small>Issue cards, edit limits/status, inspect details, and delete cards safely.</small>
+          <span class="api-method-row"><i>GET</i><i>POST</i><i>PUT</i><i class="api-method-delete">DELETE</i></span>
+        </button>
+        <button class="api-control-card" type="button" data-bind="click: function() { navigate('merchants'); }">
+          <span class="api-control-icon">🏪</span>
+          <strong>Merchants API</strong>
+          <small>Maintain merchant partners and remove unused merchant data.</small>
+          <span class="api-method-row"><i>GET</i><i>POST</i><i>PUT</i><i class="api-method-delete">DELETE</i></span>
+        </button>
+        <button class="api-control-card" type="button" data-bind="click: function() { navigate('transactions'); }">
+          <span class="api-control-icon">↕</span>
+          <strong>Transactions API</strong>
+          <small>Post purchases/payments, audit movement, and delete incorrect entries.</small>
+          <span class="api-method-row"><i>GET</i><i>POST</i><i class="api-method-delete">DELETE</i></span>
+        </button>
+      </div>
+    </article>
     <!-- /ko -->
 
     <!-- ko if: isCustomer -->
@@ -292,9 +328,24 @@
             <div class="mini-track"><i data-bind="style: { width: $parent.cardUtilization($data) + '%' }"></i></div>
           </div>
         </article>
+        <!-- ko if: $parent.isSelectedCard($data) -->
+        <article class="credit-card-tile card-detail-panel customer-card-detail-panel inline-card-detail-panel" data-bind="css: $parent.cardTileClass($data)">
+          <div class="credit-card-topline">
+            <span data-bind="text: cardType + ' CARD DETAILS'"></span>
+            <button class="card-detail-close" type="button" aria-label="Close card details" data-bind="click: $parent.closeCardDetails">×</button>
+          </div>
+          <div class="credit-card-number" data-bind="text: $parent.formatFullCardNumber(cardNumber)"></div>
+          <div class="credit-card-name" data-bind="text: $parent.currentCustomerName"></div>
+          <div class="card-detail-grid" data-bind="foreach: $parent.detailRows($data)">
+            <span><small data-bind="text: label"></small><strong data-bind="text: value"></strong></span>
+          </div>
+        </article>
+        <!-- /ko -->
       </div>
-      <div data-bind="if: selectedCard">
-        <article class="credit-card-tile card-detail-panel customer-card-detail-panel" data-bind="css: cardTileClass(selectedCard())">
+      <div class="card-detail-modal" data-bind="visible: selectedCard, css: { 'card-detail-modal-open': selectedCard() }">
+        <div class="card-detail-backdrop" data-bind="click: closeCardDetails"></div>
+        <!-- ko if: selectedCard -->
+        <article class="credit-card-tile card-detail-panel customer-card-detail-panel modal-card-detail-panel" role="dialog" aria-modal="true" aria-label="Credit card details" data-bind="css: cardTileClass(selectedCard())">
           <div class="credit-card-topline">
             <span data-bind="text: selectedCard().cardType + ' CARD DETAILS'"></span>
             <button class="card-detail-close" type="button" aria-label="Close card details" data-bind="click: closeCardDetails">×</button>
@@ -305,6 +356,7 @@
             <span><small data-bind="text: label"></small><strong data-bind="text: value"></strong></span>
           </div>
         </article>
+        <!-- /ko -->
       </div>
       <div class="empty-state compact-empty" data-bind="visible: cards().length === 0">
         <strong>No cards linked yet</strong>

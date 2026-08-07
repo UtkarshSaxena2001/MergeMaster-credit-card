@@ -119,6 +119,10 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
       this.closeCardDetails = () => {
         this.selectedCard(null);
       };
+      this.isSelectedCard = (card) => {
+        const selected = this.selectedCard();
+        return selected && card && String(selected.cardNumber) === String(card.cardNumber);
+      };
       this.detailRows = (card) => card ? [
         { label: "Cardholder", value: this.currentCustomerName() },
         { label: "Full card number", value: this.formatFullCardNumber(card.cardNumber) },

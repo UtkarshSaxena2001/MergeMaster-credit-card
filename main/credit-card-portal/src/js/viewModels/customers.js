@@ -96,12 +96,24 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
         const preview = linked.slice(0, 2).map((card) => maskCardNumber(card.cardNumber)).join(", ");
         return `${linked.length} card${linked.length === 1 ? "" : "s"}: ${preview}`;
       };
+      this.pendingActionHandler = (event) => {
+        const action = event && event.detail;
+        if (action && action.route === "customers" && action.intent === "createCustomer") {
+          this.openCreate();
+        }
+      };
     }
 
     connected() {
       AccUtils.announce("Customers page loaded.");
       document.title = "Credit Vault | Customers";
+      window.addEventListener("creditVault:pendingAction", this.pendingActionHandler);
       void this.refresh();
+      this.consumePendingAction();
+    }
+
+    disconnected() {
+      window.removeEventListener("creditVault:pendingAction", this.pendingActionHandler);
     }
 
     async save() {
@@ -119,11 +131,6 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
         this.formError(validationError);
         return;
       }
-      const duplicateError = this.findDuplicate(input, this.editingId());
-      if (duplicateError) {
-        this.formError(duplicateError);
-        return;
-      }
       this.formBusy(true);
       this.formError("");
       try {
@@ -139,8 +146,23 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
         await this.refresh();
       } catch (error) {
         this.formError(error instanceof Error ? error.message : "Customer could not be saved.");
+        await this.refresh();
       } finally {
         this.formBusy(false);
+      }
+    }
+
+    consumePendingAction() {
+      let pendingAction = null;
+      try {
+        pendingAction = JSON.parse(window.sessionStorage.getItem("creditVault.pendingAction") || "null");
+      } catch (error) {
+        pendingAction = null;
+      }
+      if (!pendingAction || pendingAction.route !== "customers") return;
+      window.sessionStorage.removeItem("creditVault.pendingAction");
+      if (pendingAction.intent === "createCustomer") {
+        window.setTimeout(() => this.openCreate(), 80);
       }
     }
 
@@ -179,21 +201,6 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
       return "";
     }
 
-    findDuplicate(input, editingId) {
-      const normalizedEmail = input.email.toLowerCase();
-      const normalizedPan = input.panNumber.toUpperCase();
-      const existing = this.customers().filter((customer) => Number(customer.customerId) !== Number(editingId));
-      if (existing.some((customer) => String(customer.email || "").trim().toLowerCase() === normalizedEmail)) {
-        return "Email is already registered";
-      }
-      if (existing.some((customer) => String(customer.mobileNumber || "").trim() === input.mobileNumber)) {
-        return "Mobile number is already registered";
-      }
-      if (existing.some((customer) => String(customer.panNumber || "").trim().toUpperCase() === normalizedPan)) {
-        return "PAN number is already registered";
-      }
-      return "";
-    }
   }
 
   return CustomersViewModel;

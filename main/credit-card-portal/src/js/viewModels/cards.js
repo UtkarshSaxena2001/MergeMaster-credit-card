@@ -88,6 +88,10 @@ define(["knockout", "../accUtils", "../api", "../appState"], function (ko, AccUt
       this.closeCardDetails = () => {
         this.selectedCard(null);
       };
+      this.isSelectedCard = (card) => {
+        const selected = this.selectedCard();
+        return selected && card && String(selected.cardNumber) === String(card.cardNumber);
+      };
       this.refresh = async () => {
         this.isLoading(true);
         this.error("");
